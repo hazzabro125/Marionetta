@@ -45,12 +45,17 @@ configurations {
 
 dependencies {
     forge "net.minecraftforge:forge:$forge_version"
+    modApi ("curse.maven:mcvrapi-591092:5032461")
+    implementation ("curse.maven:mcvrapi-591092:5032461")
     modApi("org.valkyrienskies:valkyrienskies-118-forge:$vs2_version") { transitive = false }
 
     implementation("org.valkyrienskies.core:api:$vs_core_version")
     implementation("org.valkyrienskies.core:api-game:$vs_core_version")
     implementation("org.valkyrienskies.core:util:$vs_core_version")
     implementation("org.valkyrienskies.core:impl:$vs_core_version")
+
+    implementation("org.joml:joml:1.10.4") { transitive = false }
+    implementation("org.joml:joml-primitives:1.10.0") { transitive = false }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

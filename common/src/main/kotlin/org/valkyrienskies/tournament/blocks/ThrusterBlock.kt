@@ -29,12 +29,14 @@ import org.valkyrienskies.mod.common.getShipObjectManagingPos
 import org.valkyrienskies.mod.common.util.toJOMLD
 import org.valkyrienskies.tournament.TournamentItems
 import org.valkyrienskies.tournament.TournamentProperties
+import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.ship.TournamentShips
 import org.valkyrienskies.tournament.util.DirectionalShape
 import org.valkyrienskies.tournament.util.RotShapes
 import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.*
+
 
 class ThrusterBlock(
     private val mult: () -> Double,
@@ -66,6 +68,7 @@ class ThrusterBlock(
         return Thruster_SHAPE[state.getValue(BlockStateProperties.FACING)]
     }
 
+
     override fun use(
         state: BlockState,
         level: Level,
@@ -73,23 +76,14 @@ class ThrusterBlock(
         player: Player,
         hand: InteractionHand,
         hit: BlockHitResult
+
     ): InteractionResult {
-        if (level !is ServerLevel) return InteractionResult.PASS
-
-        if (player.mainHandItem.item.asItem() == TournamentItems.UPGRADE_THRUSTER.get() && hand == InteractionHand.OFF_HAND) {
-            val tier = state.getValue(TournamentProperties.TIER)
-            if (tier < maxTier()) {
-                disableThruster(level, pos)
-                level.setBlockAndUpdate(pos, state.setValue(TournamentProperties.TIER, tier + 1))
-
-                if (!player.isCreative) {
-                    player.mainHandItem.shrink(1)
-                }
-                return InteractionResult.CONSUME
-            }
+        return if (VRPlugin.vrAPI.playerInVR(player)) {
+            TournamentShips().setTplayer(player)
+            InteractionResult.PASS
+        } else {
+            InteractionResult.FAIL
         }
-
-        return InteractionResult.PASS
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {

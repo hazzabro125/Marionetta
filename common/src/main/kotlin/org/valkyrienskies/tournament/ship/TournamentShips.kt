@@ -2,8 +2,17 @@ package org.valkyrienskies.tournament.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.ObjectIdGenerators.UUIDGenerator
 import com.google.common.util.concurrent.AtomicDouble
+import com.mojang.realmsclient.client.Request.Get
+import net.blf02.vrapi.api.IVRAPI
+import net.blf02.vrapi.api.data.IVRData
+import net.blf02.vrapi.api.data.IVRPlayer
+import net.blf02.vrapi.common.VRAPI
+import net.blf02.vrapi.data.VRData
+import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.joml.Vector3d
 import org.joml.Vector3i
@@ -13,14 +22,18 @@ import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.mod.common.util.toBlockPos
 import org.valkyrienskies.mod.common.util.toJOML
+import org.valkyrienskies.mod.common.util.transformDirection
 import org.valkyrienskies.tournament.TickScheduler
 import org.valkyrienskies.tournament.TournamentConfig
+import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.blockentity.PropellerBlockEntity
 import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.extension.toDimensionKey
 import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
+import net.minecraft.world.entity.player.Player.createAttributes
+import org.valkyrienskies.tournament.blocks.ThrusterBlock
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -29,6 +42,13 @@ import java.util.concurrent.CopyOnWriteArrayList
     setterVisibility = JsonAutoDetect.Visibility.NONE
 )
 class TournamentShips: ShipForcesInducer {
+
+    lateinit var tPlayer: Player
+
+    fun setTplayer(player: Player) {
+        tPlayer = player
+
+    }
 
     var level: DimensionId = "minecraft:overworld"
 
@@ -110,7 +130,7 @@ class TournamentShips: ShipForcesInducer {
                 return@forEach
             }
 
-            val tForce = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
+            val tForce = (VRPlugin.vrAPI.getVRPlayer(tPlayer).getController(0).lookAngle).toJOML()
             val tPos = pos.toDouble().add(0.5, 0.5, 0.5).sub(physShip.transform.positionInShip)
 
             if (force.isFinite && (
@@ -118,7 +138,7 @@ class TournamentShips: ShipForcesInducer {
                     || physShip.poseVel.vel.length() < TournamentConfig.SERVER.thrusterShutoffSpeed
                 )
             ) {
-                physShip.applyInvariantForceToPos(tForce.mul(TournamentConfig.SERVER.thrusterSpeed * tier), tPos)
+                physShip.applyInvariantForce(tForce.mul(5.0))
             }
         }
 
