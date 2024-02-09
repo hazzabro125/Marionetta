@@ -1,17 +1,17 @@
-package org.valkyrienskies.tournament;
+package org.valkyrienskies.tournament
 
-import net.blf02.forge.VRAPIPlugin;
-import net.blf02.forge.VRAPIPluginProvider;
-import net.blf02.vrapi.api.IVRAPI;
+import net.blf02.forge.VRAPIPlugin
+import net.blf02.forge.VRAPIPluginProvider
+import net.blf02.vrapi.api.IVRAPI
 
 @VRAPIPlugin
-public class VRPlugin implements VRAPIPluginProvider {
+class VRPlugin : VRAPIPluginProvider {
+    companion object {
+        var vrAPI: IVRAPI? = null
+    }
 
-    public static IVRAPI vrAPI = null;
-
-    @Override
-    public void getVRAPI(IVRAPI ivrapi) {
-        vrAPI = ivrapi;
-        VRPluginStatus.hasPlugin = true;
+    override fun getVRAPI(ivrapi: IVRAPI) {
+        vrAPI = ivrapi
+        VRPluginStatus.hasPlugin = true
     }
 }

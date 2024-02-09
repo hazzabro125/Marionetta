@@ -12,6 +12,7 @@ import net.blf02.vrapi.common.VRAPI
 import net.blf02.vrapi.data.VRData
 import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.TextComponent
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.phys.AABB
 import org.joml.Vector3d
@@ -33,6 +34,7 @@ import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.entity.player.Player.createAttributes
+import net.minecraft.world.phys.Vec3
 import org.valkyrienskies.tournament.blocks.ThrusterBlock
 
 @JsonAutoDetect(
@@ -43,20 +45,21 @@ import org.valkyrienskies.tournament.blocks.ThrusterBlock
 )
 class TournamentShips: ShipForcesInducer {
 
-    lateinit var tPlayer: Player
-
-    fun setTplayer(player: Player) {
-        tPlayer = player
-
-    }
-
     var level: DimensionId = "minecraft:overworld"
 
     data class ThrusterData(
         val pos: Vector3i,
         val force: Vector3d,
         val mult: Double,
-        var submerged: Boolean
+        var submerged: Boolean,
+        var boundPlayer: Player
+    )
+
+    data class ImportedThrusterData(
+        val pos: Vector3i,
+        val force: Vector3d,
+        val tier: Double,
+        val boundPlayer: Player
     )
 
     val thrusters =
@@ -124,13 +127,18 @@ class TournamentShips: ShipForcesInducer {
         val vel = physShip.poseVel.vel
 
         thrusters.forEach { data ->
-            val (pos, force, tier, submerged) = data
+            val (pos, force, tier, submerged, boundplayer) = data
 
             if (submerged) {
                 return@forEach
             }
 
-            val tForce = (VRPlugin.vrAPI.getVRPlayer(tPlayer).getController(0).lookAngle).toJOML()
+
+            val tForce: Vec3 = when (VRPlugin.vrAPI?.getVRPlayer(boundplayer)) {
+                null -> Vec3(0.0,-1.0,0.0)
+                else -> VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle
+            }
+
             val tPos = pos.toDouble().add(0.5, 0.5, 0.5).sub(physShip.transform.positionInShip)
 
             if (force.isFinite && (
@@ -138,7 +146,7 @@ class TournamentShips: ShipForcesInducer {
                     || physShip.poseVel.vel.length() < TournamentConfig.SERVER.thrusterShutoffSpeed
                 )
             ) {
-                physShip.applyInvariantForce(tForce.mul(5.0))
+                physShip.applyInvariantForce(tForce.toJOML().mul(5.0))
             }
         }
 
@@ -200,16 +208,17 @@ class TournamentShips: ShipForcesInducer {
     fun addThruster(
         pos: BlockPos,
         tier: Double,
-        force: Vector3d
+        force: Vector3d,
+        boundPlayer: Player
     ) {
-        thrusters += ThrusterData(pos.toJOML(), force, tier, false)
+        thrusters += ThrusterData(pos.toJOML(), force, tier, false, boundPlayer)
     }
 
     fun addThrusters(
-        list: Iterable<Triple<Vector3i, Vector3d, Double>>
+        list: Iterable<ImportedThrusterData>
     ) {
-        list.forEach { (pos, force, tier) ->
-            thrusters += ThrusterData(pos, force, tier, false)
+        list.forEach { (pos, force, tier, boundPlayer) ->
+            thrusters += ThrusterData(pos, force, tier, false, boundPlayer)
         }
     }
 

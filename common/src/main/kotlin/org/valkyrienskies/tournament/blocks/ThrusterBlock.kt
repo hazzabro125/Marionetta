@@ -3,6 +3,7 @@ package org.valkyrienskies.tournament.blocks
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.particles.ParticleOptions
+import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -52,6 +53,8 @@ class ThrusterBlock(
 
     private val Thruster_SHAPE = DirectionalShape.south(SHAPE)
 
+    private var boundplayer: Player? = null;
+
     init {
         registerDefaultState(defaultBlockState()
             .setValue(FACING, Direction.NORTH)
@@ -78,12 +81,9 @@ class ThrusterBlock(
         hit: BlockHitResult
 
     ): InteractionResult {
-        return if (VRPlugin.vrAPI.playerInVR(player)) {
-            TournamentShips().setTplayer(player)
-            InteractionResult.PASS
-        } else {
-            InteractionResult.FAIL
-        }
+        this.boundplayer = player
+        this.boundplayer!!.sendMessage(TextComponent("Bound to $boundplayer"), boundplayer!!.uuid)
+        return InteractionResult.PASS
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
@@ -142,7 +142,8 @@ class ThrusterBlock(
                 state.getValue(FACING).normal.toJOMLD()
                     .mul(state.getValue(BlockStateProperties.POWER).toDouble()
                             * state.getValue(TournamentProperties.TIER).toDouble()
-                            * mult())
+                            * mult()),
+                boundplayer as Player
             )
         }
     }

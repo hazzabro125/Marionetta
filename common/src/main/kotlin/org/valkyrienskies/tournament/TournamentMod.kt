@@ -39,7 +39,7 @@ object TournamentMod {
             else {
                 val thrusterShipCtrl = ship.getAttachment<ThrusterShipControl>()
                 if (thrusterShipCtrl != null) {
-                    TournamentShips.getOrCreate(ship).addThrusters(thrusterShipCtrl.Thrusters.with(thrusterShipCtrl.thrusters))
+                    TournamentShips.getOrCreate(ship).addThrusters(thrusterShipCtrl.Thrusters.with(thrusterShipCtrl.thrusters) as Iterable<TournamentShips.ImportedThrusterData>)
                     ship.saveAttachment<ThrusterShipControl>(null)
                 }
 

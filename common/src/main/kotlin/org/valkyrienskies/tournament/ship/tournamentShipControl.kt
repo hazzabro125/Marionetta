@@ -35,7 +35,7 @@ class tournamentShipControl : ShipForcesInducer {
 
     private val Balloons = mutableListOf<Pair<Vector3i, Double>>()
     private val Spinners = mutableListOf<Pair<Vector3i, Vector3d>>()
-    private val Thrusters = mutableListOf<Triple<Vector3i, Vector3d, Double>>()
+    private val Thrusters = mutableListOf<TournamentShips.ImportedThrusterData>()
     private val Pulses = CopyOnWriteArrayList<Pair<Vector3d, Vector3d>>()
 
     override fun applyForces(physShip: PhysShip) {

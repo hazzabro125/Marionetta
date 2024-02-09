@@ -1,5 +1,6 @@
-package org.valkyrienskies.tournament;
+package org.valkyrienskies.tournament
 
-public class VRPluginStatus {
-    public static boolean hasPlugin = false;
+object VRPluginStatus {
+    @JvmField
+    var hasPlugin: Boolean = false
 }
