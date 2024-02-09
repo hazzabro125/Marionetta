@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 @Deprecated("Use TournamentShips instead")
 class ThrusterShipControl : ShipForcesInducer {
 
-    val Thrusters = mutableListOf<Triple<Vector3i, Vector3d, Double>>()
+    val Thrusters = mutableListOf<TournamentShips.ImportedThrusterData>()
 
     val thrusters = CopyOnWriteArrayList<Triple<Vector3i, Vector3d, Double>>()
 
