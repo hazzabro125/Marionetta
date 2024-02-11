@@ -130,10 +130,9 @@ class TournamentShips: ShipForcesInducer {
             val (pos, force, tier, submerged, boundplayer) = data
 
             val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
-            var tForce2: Vector3d =  (boundplayer.lookAngle).toJOML()
+            var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
 
             boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("${(boundplayer!!.lookAngle).toJOML()}"), boundplayer!!.uuid)
             boundplayer!!.sendMessage(TextComponent("$tForce2"), boundplayer!!.uuid)
 
             physShip.applyInvariantForce(tForce2.mul(20000.0))
