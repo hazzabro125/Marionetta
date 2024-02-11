@@ -129,25 +129,16 @@ class TournamentShips: ShipForcesInducer {
         thrusters.forEach { data ->
             val (pos, force, tier, submerged, boundplayer) = data
 
-            if (submerged) {
-                return@forEach
-            }
+            val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
+            var tForce2: Vector3d =  (boundplayer.lookAngle).toJOML()
+
+            boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("${(boundplayer!!.lookAngle).toJOML()}"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("$tForce2"), boundplayer!!.uuid)
+
+            physShip.applyInvariantForce(tForce2.mul(20000.0))
 
 
-            val tForce: Vec3 = when (VRPlugin.vrAPI?.getVRPlayer(boundplayer)) {
-                null -> Vec3(0.0,-1.0,0.0)
-                else -> VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle
-            }
-
-            val tPos = pos.toDouble().add(0.5, 0.5, 0.5).sub(physShip.transform.positionInShip)
-
-            if (force.isFinite && (
-                TournamentConfig.SERVER.thrusterShutoffSpeed == -1.0
-                    || physShip.poseVel.vel.length() < TournamentConfig.SERVER.thrusterShutoffSpeed
-                )
-            ) {
-                physShip.applyInvariantForce(tForce.toJOML().mul(5.0))
-            }
         }
 
         balloons.forEach {
