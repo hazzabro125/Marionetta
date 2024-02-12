@@ -1,40 +1,27 @@
 package org.valkyrienskies.tournament.ship
 
+import org.valkyrienskies.tournament.PIDController
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.ObjectIdGenerators.UUIDGenerator
 import com.google.common.util.concurrent.AtomicDouble
-import com.mojang.realmsclient.client.Request.Get
-import net.blf02.vrapi.api.IVRAPI
 import net.blf02.vrapi.api.data.IVRData
-import net.blf02.vrapi.api.data.IVRPlayer
-import net.blf02.vrapi.common.VRAPI
-import net.blf02.vrapi.data.VRData
-import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.TextComponent
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.phys.AABB
 import org.joml.Vector3d
 import org.joml.Vector3i
-import org.joml.primitives.AABBd
 import org.valkyrienskies.core.api.ships.*
 import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
-import org.valkyrienskies.mod.common.util.toBlockPos
 import org.valkyrienskies.mod.common.util.toJOML
-import org.valkyrienskies.mod.common.util.transformDirection
 import org.valkyrienskies.tournament.TickScheduler
-import org.valkyrienskies.tournament.TournamentConfig
 import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.extension.toDimensionKey
 import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
-import net.minecraft.world.entity.player.Player.createAttributes
 import net.minecraft.world.phys.Vec3
-import org.valkyrienskies.tournament.blocks.ThrusterBlock
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -86,6 +73,12 @@ class TournamentShips: ShipForcesInducer {
     @JsonIgnore
     private var ticker: TickScheduler.Ticking? = null
 
+    fun IVRData.relativePosition(boundPlayer: Player): Vec3 {
+        return this.position().subtract(boundPlayer.position())
+    }
+
+
+
     override fun applyForces(physShip: PhysShip) {
         physShip as PhysShipImpl
 
@@ -112,13 +105,21 @@ class TournamentShips: ShipForcesInducer {
         thrusters.forEach { data ->
             val (pos, force, tier, submerged, boundplayer) = data
 
+            val tPos = Vector3d(pos).add(0.5, 0.5, 0.5).sub(physShip.transform.positionInShip)
             val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
             var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
+            var tRelative: Vector3d = VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.relativePosition(boundplayer).toJOML()
+            var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
+            var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
+            var tPID: Vector3d = Vector3d(PIDController(kp = 5.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.x, tMechPos.x),
+                PIDController(kp = 5.0, ki =0.0, kd = 0.0,).calculateOutput(tPos.y, tMechPos.y),
+                PIDController(kp = 5.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.z, tMechPos.z))
 
             boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("$tForce2"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("$tMechPos"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("$tPID"), boundplayer!!.uuid)
 
-            physShip.applyInvariantForce(tForce2.mul(20000.0))
+            physShip.applyInvariantForce(tPID.mul(20000.0))
 
 
         }
