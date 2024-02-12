@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import org.valkyrienskies.core.impl.config.VSConfigClass.Companion.getRegisteredConfig
 import org.valkyrienskies.mod.compat.clothconfig.VSClothConfig.createConfigScreenFor
-import org.valkyrienskies.tournament.TournamentBlocks.SHIP_ASSEMBLER
+import org.valkyrienskies.tournament.TournamentBlocks.THRUSTER
 import org.valkyrienskies.tournament.TournamentConfig
 import org.valkyrienskies.tournament.TournamentItems
 import org.valkyrienskies.tournament.TournamentMod
@@ -60,7 +60,7 @@ class TournamentModForge {
         }
         TournamentItems.TAB = object : CreativeModeTab("vs_tournament.main_tab") {
             override fun makeIcon(): ItemStack {
-                return ItemStack(SHIP_ASSEMBLER.get())
+                return ItemStack(THRUSTER.get())
             }
         }
         init()

@@ -12,13 +12,8 @@ import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.material.Material
 import org.valkyrienskies.mod.common.hooks.VSGameEvents
-import org.valkyrienskies.tournament.blockentity.BigPropellerBlockEntity
-import org.valkyrienskies.tournament.blockentity.SmallPropellerBlockEntity
 import org.valkyrienskies.tournament.util.extension.explodeShip
 import org.valkyrienskies.tournament.blocks.*
-import org.valkyrienskies.tournament.blocks.explosive.AbstractExplosiveBlock
-import org.valkyrienskies.tournament.blocks.explosive.SimpleExplosiveStagedBlock
-import org.valkyrienskies.tournament.blocks.explosive.TestExplosiveBlock
 import org.valkyrienskies.tournament.registry.DeferredRegister
 import org.valkyrienskies.tournament.registry.RegistrySupplier
 
@@ -28,34 +23,13 @@ object TournamentBlocks {
     private val ITEMS = ArrayList<Pair<String, ()->Item>>()
 
 
-    lateinit var SHIP_ASSEMBLER           : RegistrySupplier<ShipAssemblerBlock>
-    lateinit var BALLAST                  : RegistrySupplier<BallastBlock>
-    lateinit var POWERED_BALLOON          : RegistrySupplier<BalloonBlock>
-    lateinit var BALLOON                  : RegistrySupplier<BalloonBlock>
     lateinit var FLOATER                  : RegistrySupplier<Block>
     lateinit var THRUSTER                 : RegistrySupplier<ThrusterBlock>
     lateinit var THRUSTER_TINY            : RegistrySupplier<ThrusterBlock>
-    lateinit var SPINNER                  : RegistrySupplier<SpinnerBlock>
-    lateinit var SEAT                     : RegistrySupplier<SeatBlock>
-    lateinit var ROPE_HOOK                : RegistrySupplier<RopeHookBlock>
-    lateinit var SENSOR                   : RegistrySupplier<SensorBlock>
-    lateinit var PROP_BIG                 : RegistrySupplier<PropellerBlock>
-    lateinit var PROP_SMALL               : RegistrySupplier<PropellerBlock>
-    lateinit var CHUNK_LOADER             : RegistrySupplier<ChunkLoaderBlock>
-
-    lateinit var EXPLOSIVE_INSTANT_SMALL  : RegistrySupplier<AbstractExplosiveBlock>
-    lateinit var EXPLOSIVE_INSTANT_MEDIUM : RegistrySupplier<AbstractExplosiveBlock>
-    lateinit var EXPLOSIVE_INSTANT_LARGE  : RegistrySupplier<AbstractExplosiveBlock>
-
-    lateinit var EXPLOSIVE_STAGED_SMALL   : RegistrySupplier<AbstractExplosiveBlock>
 
     // lateinit var EXPLOSIVE_TEST           : RegistrySupplier<TestExplosiveBlock>
 
     fun register() {
-        SHIP_ASSEMBLER           = register("ship_assembler", ::ShipAssemblerBlock)
-        BALLAST                  = register("ballast", ::BallastBlock)
-        POWERED_BALLOON          = register("balloon", ::PoweredBalloonBlock)
-        BALLOON                  = register("balloon_unpowered", ::BalloonBlock)
         FLOATER                  = register("floater") { Block(
             BlockBehaviour.Properties.of(Material.WOOD)
                 .sound(SoundType.WOOD)
@@ -85,49 +59,12 @@ object TournamentBlocks {
                 t
             }
         }
-        SPINNER                  = register("spinner", ::SpinnerBlock)
-        SEAT                     = register("seat", ::SeatBlock)
-        SENSOR                   = register("sensor", ::SensorBlock)
-        ROPE_HOOK                = register("rope_hook", ::RopeHookBlock)
-        PROP_BIG                 = register("prop_big") {
-            PropellerBlock(
-                TournamentConfig.SERVER.propellerBigForce,
-                ::BigPropellerBlockEntity
-            )
-        }
-        PROP_SMALL               = register("prop_small") {
-            PropellerBlock(
-                TournamentConfig.SERVER.propellerSmallForce,
-                ::SmallPropellerBlockEntity
-            )
-        }
-        CHUNK_LOADER             = register("chunk_loader", ::ChunkLoaderBlock)
 
-        EXPLOSIVE_INSTANT_SMALL  = register("explosive_instant_small") { object : AbstractExplosiveBlock() {
-            override fun explode(level: ServerLevel, pos: BlockPos) {
-                level.explodeShip(pos.x+0.5, pos.y+0.5, pos.z+0.5, 3.0f, Explosion.BlockInteraction.BREAK)
-            }}
-        }
-        EXPLOSIVE_INSTANT_MEDIUM = register("explosive_instant_medium") { object : AbstractExplosiveBlock() {
-            override fun explode(level: ServerLevel, pos: BlockPos) {
-                level.explodeShip(pos.x+0.5, pos.y+0.5, pos.z+0.5, 6.0f, Explosion.BlockInteraction.BREAK)
-            }}
-        }
-        EXPLOSIVE_INSTANT_LARGE  = register("explosive_instant_large") { object : AbstractExplosiveBlock() {
-            override fun explode(level: ServerLevel, pos: BlockPos) {
-                level.explodeShip(pos.x+0.5, pos.y+0.5, pos.z+0.5, 12.0f, Explosion.BlockInteraction.BREAK)
-            }}
-        }
-        EXPLOSIVE_STAGED_SMALL   = register("explosive_staged_small") {
-            object : SimpleExplosiveStagedBlock(
-                (3..7),
-                (4..7),
-                (-10..10),
-                (-2..2),
-                (-10..10),
-                Explosion.BlockInteraction.BREAK
-            ) {}
-        }
+
+
+
+
+
         // EXPLOSIVE_TEST           = register("explosive_test", ::TestExplosiveBlock)
 
         /*
@@ -140,11 +77,6 @@ object TournamentBlocks {
 
 
         // old:
-        register("shipifier", null) { OldBlock(SHIP_ASSEMBLER.get()) }
-        register("instantexplosive", null) { OldBlock(EXPLOSIVE_INSTANT_MEDIUM.get()) }
-        register("instantexplosive_big", null) { OldBlock(EXPLOSIVE_INSTANT_LARGE.get()) }
-        register("stagedexplosive", null) { OldBlock(EXPLOSIVE_STAGED_SMALL.get()) }
-        register("stagedexplosive_big", null) { OldBlock(Blocks.AIR) }
 
         BLOCKS.applyAll()
         VSGameEvents.registriesCompleted.on { _, _ ->
@@ -178,9 +110,7 @@ object TournamentBlocks {
     }
 
     fun makeFlammables() {
-        flammableBlock(SEAT.get(), 15, 25)
-        flammableBlock(POWERED_BALLOON.get(), 30, 60)
-        flammableBlock(BALLOON.get(), 30, 60)
+
         flammableBlock(FLOATER.get(), 30, 60)
     }
 
