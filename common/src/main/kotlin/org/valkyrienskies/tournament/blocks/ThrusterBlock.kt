@@ -27,6 +27,7 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.mod.common.getShipManagingPos
 import org.valkyrienskies.mod.common.getShipObjectManagingPos
+import org.valkyrienskies.mod.common.util.toJOML
 import org.valkyrienskies.mod.common.util.toJOMLD
 import org.valkyrienskies.tournament.TournamentProperties
 import org.valkyrienskies.tournament.VRPlugin
@@ -81,7 +82,8 @@ class ThrusterBlock(
 
     ): InteractionResult {
         this.boundplayer = player
-        this.boundplayer!!.sendMessage(TextComponent("Bound to $boundplayer"), boundplayer!!.uuid)
+        this.boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
+        this.boundplayer!!.sendMessage(TextComponent("${(boundplayer!!.lookAngle).toJOML()}"), boundplayer!!.uuid)
         return InteractionResult.PASS
     }
 
