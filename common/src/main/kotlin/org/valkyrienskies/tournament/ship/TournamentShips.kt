@@ -22,6 +22,8 @@ import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.phys.Vec3
+import org.valkyrienskies.tournament.blocks.ThrusterBlock
+import java.util.logging.Level
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -105,21 +107,24 @@ class TournamentShips: ShipForcesInducer {
         thrusters.forEach { data ->
             val (pos, force, tier, submerged, boundplayer) = data
 
-            val tPos = Vector3d(pos).add(0.5, 0.5, 0.5).sub(physShip.transform.positionInShip)
-            val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
-            var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
-            var tRelative: Vector3d = VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.relativePosition(boundplayer).toJOML()
-            var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
-            var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
-            var tPID: Vector3d = Vector3d(PIDController(kp = 5.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.x, tMechPos.x),
-                PIDController(kp = 5.0, ki =0.0, kd = 0.0,).calculateOutput(tPos.y, tMechPos.y),
-                PIDController(kp = 5.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.z, tMechPos.z))
+            val level2 = boundplayer.level
+            val tPos = Helper3d.convertShipToWorldSpace(level2, pos.toDouble())
+           // val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
+         //   var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
+         //   var tRelative: Vector3d = VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.relativePosition(boundplayer).toJOML()
+         //   var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
+        //    var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
+            var tMechPos2: Vector3d = boundplayer.position().toJOML().add(0.0, 3.0, 0.0)
+            var tPID: Vector3d = Vector3d(PIDController(kp = 25000.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.x, tMechPos2.x),
+                PIDController(kp = 50000.0, ki =0.0, kd = 0.0,).calculateOutput(tPos.y, tMechPos2.y),
+                PIDController(kp = 25000.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.z, tMechPos2.z))
 
             boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("$tMechPos"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("$tMechPos2"), boundplayer!!.uuid)
             boundplayer!!.sendMessage(TextComponent("$tPID"), boundplayer!!.uuid)
+            boundplayer!!.sendMessage(TextComponent("$tPos"), boundplayer!!.uuid)
 
-            physShip.applyInvariantForce(tPID.mul(20000.0))
+            physShip.applyInvariantForce(tPID)
 
 
         }
