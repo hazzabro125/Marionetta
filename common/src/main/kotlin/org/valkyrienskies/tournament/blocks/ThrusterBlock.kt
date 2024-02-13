@@ -28,7 +28,6 @@ import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.mod.common.getShipManagingPos
 import org.valkyrienskies.mod.common.getShipObjectManagingPos
 import org.valkyrienskies.mod.common.util.toJOMLD
-import org.valkyrienskies.tournament.TournamentItems
 import org.valkyrienskies.tournament.TournamentProperties
 import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.ship.TournamentShips
@@ -121,9 +120,6 @@ class ThrusterBlock(
         val drops = super.getDrops(state, builder)
 
         val tier = state.getValue(TournamentProperties.TIER)
-        if (tier > 1) {
-            drops.add(ItemStack(TournamentItems.UPGRADE_THRUSTER.get(), tier - 1))
-        }
 
         return drops
     }

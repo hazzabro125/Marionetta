@@ -10,10 +10,6 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
-import org.valkyrienskies.tournament.blockentity.*
-import org.valkyrienskies.tournament.blockentity.explosive.ExplosiveBlockEntity
-import org.valkyrienskies.tournament.blockentity.render.PropellerBlockEntityRender
-import org.valkyrienskies.tournament.blockentity.render.SensorBlockEntityRender
 import org.valkyrienskies.tournament.registry.DeferredRegister
 import org.valkyrienskies.tournament.registry.RegistrySupplier
 
@@ -22,57 +18,6 @@ object TournamentBlockEntities {
     private val BLOCKENTITIES = DeferredRegister.create(TournamentMod.MOD_ID, Registry.BLOCK_ENTITY_TYPE_REGISTRY)
 
     private val renderers = mutableListOf<RendererEntry<*>>()
-
-    /* ================================================================== */
-    val SENSOR              = TournamentBlocks.SENSOR
-        .withBE(::SensorBlockEntity)
-        .byName ("sensor")
-        .withRenderer {
-            SensorBlockEntityRender()
-        }
-    /* ================================================================== */
-    val ROPE_HOOK           = TournamentBlocks.ROPE_HOOK
-        .withBE(::RopeHookBlockEntity)
-        .byName ("rope_hook")
-    /* ================================================================== */
-    val PROP_BIG            = TournamentBlocks.PROP_BIG
-        .withBE(::BigPropellerBlockEntity)
-        .byName ("prop_big")
-        .withRenderer {
-            PropellerBlockEntityRender<BigPropellerBlockEntity>(
-                TournamentModels.PROP_BIG
-            )
-        }
-    /* ================================================================== */
-    val PROP_SMALL          = TournamentBlocks.PROP_SMALL
-        .withBE(::SmallPropellerBlockEntity)
-        .byName ("prop_small")
-        .withRenderer {
-            PropellerBlockEntityRender<SmallPropellerBlockEntity>(
-                TournamentModels.PROP_SMALL
-            )
-        }
-    /* ================================================================== */
-    val CHUNK_LOADER        = TournamentBlocks.CHUNK_LOADER
-        .withBE(::ChunkLoaderBlockEntity)
-        .byName ("chunk_loader")
-    /* ================================================================== */
-    val EXPLOSIVE           = TournamentBlocks.EXPLOSIVE_INSTANT_SMALL
-        .withBE(::ExplosiveBlockEntity)
-        .byName("explosive_instant_small")
-    /* ================================================================== */
-    val EXPLOSIVE_M         = TournamentBlocks.EXPLOSIVE_INSTANT_MEDIUM
-        .withBE(::ExplosiveBlockEntity)
-        .byName("explosive_instant_medium")
-    /* ================================================================== */
-    val EXPLOSIVE_L         = TournamentBlocks.EXPLOSIVE_INSTANT_LARGE
-        .withBE(::ExplosiveBlockEntity)
-        .byName("explosive_instant_large")
-    /* ================================================================== */
-    val EXPLOSIVE_STAGED_S  = TournamentBlocks.EXPLOSIVE_STAGED_SMALL
-        .withBE(::ExplosiveBlockEntity)
-        .byName("explosive_staged_small")
-    /* ================================================================== */
 
     fun register() {
         BLOCKENTITIES.applyAll()

@@ -3,8 +3,10 @@ package org.valkyrienskies.tournament.forge
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.data.BlockFamilies.PURPUR
 import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items.PURPUR_BLOCK
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraftforge.client.ConfigGuiHandler.ConfigGuiFactory
@@ -16,7 +18,6 @@ import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import org.valkyrienskies.core.impl.config.VSConfigClass.Companion.getRegisteredConfig
 import org.valkyrienskies.mod.compat.clothconfig.VSClothConfig.createConfigScreenFor
-import org.valkyrienskies.tournament.TournamentBlocks.SHIP_ASSEMBLER
 import org.valkyrienskies.tournament.TournamentConfig
 import org.valkyrienskies.tournament.TournamentItems
 import org.valkyrienskies.tournament.TournamentMod
@@ -60,7 +61,7 @@ class TournamentModForge {
         }
         TournamentItems.TAB = object : CreativeModeTab("vs_tournament.main_tab") {
             override fun makeIcon(): ItemStack {
-                return ItemStack(SHIP_ASSEMBLER.get())
+                return ItemStack(PURPUR_BLOCK)
             }
         }
         init()

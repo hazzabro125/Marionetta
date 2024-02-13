@@ -29,7 +29,6 @@ public class TournamentModFabric implements ModInitializer {
 
         TournamentItems.TAB = FabricItemGroupBuilder
                 .create(new ResourceLocation(TournamentMod.MOD_ID, "main_tab"))
-                .icon(() -> new ItemStack(TournamentBlocks.INSTANCE.getSHIP_ASSEMBLER().get()))
                 .build();
 
         ServerTickEvents.END_SERVER_TICK.register(TickScheduler.INSTANCE::tickServer);
