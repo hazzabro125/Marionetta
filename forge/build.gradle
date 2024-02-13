@@ -45,8 +45,8 @@ configurations {
 
 dependencies {
     forge "net.minecraftforge:forge:$forge_version"
-    modApi ("curse.maven:mcvrapi-591092:5032461")
-    implementation ("curse.maven:mcvrapi-591092:5032461")
+    implementation ("curse.maven:mc-vr-api-591092:5032461")
+    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
     modApi("org.valkyrienskies:valkyrienskies-118-forge:$vs2_version") { transitive = false }
 
     implementation("org.valkyrienskies.core:api:$vs_core_version")
@@ -105,42 +105,5 @@ sourcesJar {
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
-    }
-}
-
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            groupId = "org.valkyrienskies.tournament"
-            version = project.version
-            artifactId = rootProject.archives_base_name + "-" + project.name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        if (project.vs_maven_username && project.vs_maven_password) {
-            println "Publishing to VS Maven"
-            maven {
-                url = project.vs_maven_url
-                credentials {
-                    username = project.vs_maven_username
-                    password = project.vs_maven_password
-                }
-            }
-        }
-        // Add repositories to publish to here.
-        if (System.getenv("GITHUB_ACTOR") != null) {
-            println "Publishing to Github Packages"
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/ConstantDust/VS2_tournament")
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-        }
     }
 }
