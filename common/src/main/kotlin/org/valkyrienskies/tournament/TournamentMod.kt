@@ -39,6 +39,5 @@ object TournamentMod {
     }
     @JvmStatic
     fun initClientRenderers(clientRenderers: ClientRenderers) {
-        TournamentBlockEntities.initClientRenderers(clientRenderers)
     }
 }
