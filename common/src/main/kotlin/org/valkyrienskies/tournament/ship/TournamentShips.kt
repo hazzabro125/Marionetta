@@ -22,6 +22,7 @@ import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.phys.Vec3
+import org.valkyrienskies.tournament.TournamentCommands
 import org.valkyrienskies.tournament.blocks.ThrusterBlock
 import java.util.logging.Level
 
@@ -33,6 +34,7 @@ import java.util.logging.Level
 )
 class TournamentShips: ShipForcesInducer {
 
+    var xkp: Double = 0.0
     var level: DimensionId = "minecraft:overworld"
 
     data class ThrusterData(
@@ -113,14 +115,14 @@ class TournamentShips: ShipForcesInducer {
          //   var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
         //    var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
             var tMechPos2: Vector3d = boundplayer.position().toJOML().add(0.0, 3.0, 0.0)
-            var tPID: Vector3d = Vector3d(PIDController(kp = 25000.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.x, tMechPos2.x),
-                PIDController(kp = 50000.0, ki =0.0, kd = 0.0,).calculateOutput(tPos.y, tMechPos2.y),
-                PIDController(kp = 25000.0, ki = 0.0, kd = 0.0,).calculateOutput(tPos.z, tMechPos2.z))
+            var tPID: Vector3d = Vector3d(PIDController(kp = TournamentCommands.xkp, ki = TournamentCommands.xki, kd = TournamentCommands.xkd,).calculateOutput(tPos.x, tMechPos2.x),
+                PIDController(kp = TournamentCommands.ykp, ki = TournamentCommands.yki, kd = TournamentCommands.ykd,).calculateOutput(tPos.y, tMechPos2.y),
+                PIDController(kp = TournamentCommands.zkp, ki = TournamentCommands.zki, kd = TournamentCommands.zkd,).calculateOutput(tPos.z, tMechPos2.z))
 
-            boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("$tMechPos2"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("$tPID"), boundplayer!!.uuid)
-            boundplayer!!.sendMessage(TextComponent("$tPos"), boundplayer!!.uuid)
+            boundplayer.sendMessage(TextComponent("Bound to ${boundplayer.name.contents}"), boundplayer.uuid)
+            boundplayer.sendMessage(TextComponent("$tMechPos2"), boundplayer.uuid)
+            boundplayer.sendMessage(TextComponent("$tPID"), boundplayer.uuid)
+            boundplayer.sendMessage(TextComponent("$tPos"), boundplayer.uuid)
 
             physShip.applyInvariantForce(tPID)
 

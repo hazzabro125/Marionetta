@@ -13,19 +13,18 @@ import net.minecraftforge.client.ConfigGuiHandler.ConfigGuiFactory
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers
 import net.minecraftforge.client.event.ModelRegistryEvent
 import net.minecraftforge.client.model.ForgeModelBakery
+import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
 import org.valkyrienskies.core.impl.config.VSConfigClass.Companion.getRegisteredConfig
+import org.valkyrienskies.mod.common.command.VSCommands
 import org.valkyrienskies.mod.compat.clothconfig.VSClothConfig.createConfigScreenFor
+import org.valkyrienskies.tournament.*
 import org.valkyrienskies.tournament.TournamentBlocks.THRUSTER
-import org.valkyrienskies.tournament.TournamentConfig
-import org.valkyrienskies.tournament.TournamentItems
-import org.valkyrienskies.tournament.TournamentMod
 import org.valkyrienskies.tournament.TournamentMod.init
 import org.valkyrienskies.tournament.TournamentMod.initClient
 import org.valkyrienskies.tournament.TournamentMod.initClientRenderers
-import org.valkyrienskies.tournament.TournamentModels
 import thedarkcolour.kotlinforforge.forge.LOADING_CONTEXT
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 
@@ -34,6 +33,8 @@ class TournamentModForge {
     private var happendClientSetup = false
 
     init {
+        val forgeBus = Mod.EventBusSubscriber.Bus.FORGE.bus().get()
+
         // Submit our event bus to let architectury register our content on the right time
         MOD_BUS.addListener { event: FMLClientSetupEvent? ->
             clientSetup(
@@ -65,6 +66,9 @@ class TournamentModForge {
                 return ItemStack(THRUSTER.get())
             }
         }
+
+        forgeBus.addListener(::registerCommands)
+
         init()
     }
 
@@ -93,6 +97,10 @@ class TournamentModForge {
             println("[Tournament] Registering model $rl")
             ForgeModelBakery.addSpecialModel(rl)
         }
+    }
+
+    private fun registerCommands(event: RegisterCommandsEvent) {
+        TournamentCommands.register(event.dispatcher)
     }
 
     companion object {
