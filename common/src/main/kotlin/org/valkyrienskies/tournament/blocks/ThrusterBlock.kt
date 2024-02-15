@@ -33,6 +33,7 @@ import org.valkyrienskies.tournament.TournamentProperties
 import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.ship.TournamentShips
 import org.valkyrienskies.tournament.util.DirectionalShape
+import org.valkyrienskies.tournament.util.PlayerReference
 import org.valkyrienskies.tournament.util.RotShapes
 import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.helper.Helper3d
@@ -53,7 +54,7 @@ class ThrusterBlock(
 
     private val Thruster_SHAPE = DirectionalShape.south(SHAPE)
 
-    private var boundplayer: Player? = null;
+    private var boundplayer: PlayerReference? = null;
 
     init {
         registerDefaultState(defaultBlockState()
@@ -81,11 +82,11 @@ class ThrusterBlock(
         hit: BlockHitResult
 
     ): InteractionResult {
-        this.boundplayer = player
-        this.boundplayer!!.sendMessage(TextComponent("Bound to ${boundplayer!!.name.contents}"), boundplayer!!.uuid)
-        this.boundplayer!!.sendMessage(TextComponent("${(boundplayer!!.lookAngle).toJOML()}"), boundplayer!!.uuid)
+        this.boundplayer = player as PlayerReference
+        player.sendMessage(TextComponent("Bound to ${player.name.contents}"), player.uuid)
+        player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
         return InteractionResult.PASS
-    }
+}
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
         builder.add(FACING)
@@ -141,7 +142,7 @@ class ThrusterBlock(
                     .mul(state.getValue(BlockStateProperties.POWER).toDouble()
                             * state.getValue(TournamentProperties.TIER).toDouble()
                             * mult()),
-                boundplayer as Player
+                boundplayer as PlayerReference
             )
         }
     }

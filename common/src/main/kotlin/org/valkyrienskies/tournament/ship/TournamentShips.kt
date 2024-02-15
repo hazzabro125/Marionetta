@@ -7,6 +7,7 @@ import com.google.common.util.concurrent.AtomicDouble
 import net.blf02.vrapi.api.data.IVRData
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.TextComponent
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.player.Player
 import org.joml.Vector3d
 import org.joml.Vector3i
@@ -15,7 +16,6 @@ import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.mod.common.util.toJOML
 import org.valkyrienskies.tournament.TickScheduler
-import org.valkyrienskies.tournament.VRPlugin
 import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.extension.toDimensionKey
 import org.valkyrienskies.tournament.util.extension.toDouble
@@ -23,8 +23,7 @@ import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.phys.Vec3
 import org.valkyrienskies.tournament.TournamentCommands
-import org.valkyrienskies.tournament.blocks.ThrusterBlock
-import java.util.logging.Level
+import org.valkyrienskies.tournament.util.PlayerReference
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -36,20 +35,21 @@ class TournamentShips: ShipForcesInducer {
 
     var xkp: Double = 0.0
     var level: DimensionId = "minecraft:overworld"
+    lateinit var globalLevel: ServerLevel
 
     data class ThrusterData(
         val pos: Vector3i,
         val force: Vector3d,
         val mult: Double,
         var submerged: Boolean,
-        var boundPlayer: Player
+        var boundPlayer: PlayerReference
     )
 
     data class ImportedThrusterData(
         val pos: Vector3i,
         val force: Vector3d,
         val tier: Double,
-        val boundPlayer: Player
+        val boundPlayer: PlayerReference
     )
 
     val thrusters =
@@ -89,6 +89,7 @@ class TournamentShips: ShipForcesInducer {
         if (ticker == null) {
             ticker = TickScheduler.serverTickPerm { server ->
                 val lvl = server.getLevel(level.toDimensionKey())
+                    globalLevel = lvl
                     ?: return@serverTickPerm
 
                 thrusters.forEach { t ->
@@ -106,23 +107,23 @@ class TournamentShips: ShipForcesInducer {
 
         thrusters.forEach { data ->
             val (pos, force, tier, submerged, boundplayer) = data
+            var boundplayer2 = boundplayer.resolve(globalLevel)
 
-            val level2 = boundplayer.level
-            val tPos = Helper3d.convertShipToWorldSpace(level2, pos.toDouble())
+            val tPos = Helper3d.convertShipToWorldSpace(globalLevel, pos.toDouble())
            // val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
          //   var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
          //   var tRelative: Vector3d = VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.relativePosition(boundplayer).toJOML()
          //   var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
         //    var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
-            var tMechPos2: Vector3d = boundplayer.position().toJOML().add(0.0, 3.0, 0.0)
+            var tMechPos2: Vector3d = boundplayer.resolve(globalLevel)!!.position().toJOML().add(0.0, 3.0, 0.0)
             var tPID: Vector3d = Vector3d(PIDController(kp = TournamentCommands.xkp, ki = TournamentCommands.xki, kd = TournamentCommands.xkd,).calculateOutput(tPos.x, tMechPos2.x),
                 PIDController(kp = TournamentCommands.ykp, ki = TournamentCommands.yki, kd = TournamentCommands.ykd,).calculateOutput(tPos.y, tMechPos2.y),
                 PIDController(kp = TournamentCommands.zkp, ki = TournamentCommands.zki, kd = TournamentCommands.zkd,).calculateOutput(tPos.z, tMechPos2.z))
 
-            boundplayer.sendMessage(TextComponent("Bound to ${boundplayer.name.contents}"), boundplayer.uuid)
-            boundplayer.sendMessage(TextComponent("$tMechPos2"), boundplayer.uuid)
-            boundplayer.sendMessage(TextComponent("$tPID"), boundplayer.uuid)
-            boundplayer.sendMessage(TextComponent("$tPos"), boundplayer.uuid)
+            boundplayer2!!.sendMessage(TextComponent("Bound to ${boundplayer2.name.contents}"), boundplayer2.uuid)
+            boundplayer2.sendMessage(TextComponent("$tMechPos2"), boundplayer2.uuid)
+            boundplayer2.sendMessage(TextComponent("$tPID"), boundplayer2.uuid)
+            boundplayer2.sendMessage(TextComponent("$tPos"), boundplayer2.uuid)
 
             physShip.applyInvariantForce(tPID)
 
@@ -133,7 +134,7 @@ class TournamentShips: ShipForcesInducer {
         pos: BlockPos,
         tier: Double,
         force: Vector3d,
-        boundPlayer: Player
+        boundPlayer: PlayerReference
     ) {
         thrusters += ThrusterData(pos.toJOML(), force, tier, false, boundPlayer)
     }
