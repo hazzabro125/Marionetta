@@ -8,6 +8,7 @@ import net.blf02.vrapi.api.data.IVRData
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.player.Player
 import org.joml.Vector3d
 import org.joml.Vector3i
@@ -35,7 +36,8 @@ class TournamentShips: ShipForcesInducer {
 
     var xkp: Double = 0.0
     var level: DimensionId = "minecraft:overworld"
-    lateinit var globalLevel: ServerLevel
+    @JsonIgnore
+    var globalLevel: ServerLevel? = null
 
     data class ThrusterData(
         val pos: Vector3i,
@@ -107,15 +109,23 @@ class TournamentShips: ShipForcesInducer {
 
         thrusters.forEach { data ->
             val (pos, force, tier, submerged, boundplayer) = data
-            var boundplayer2 = boundplayer.resolve(globalLevel)
+            var boundplayer2: ServerPlayer? = null
 
-            val tPos = Helper3d.convertShipToWorldSpace(globalLevel, pos.toDouble())
+            // Check if globalLevel is not null before attempting to resolve
+            if (globalLevel != null) {
+                boundplayer2 = boundplayer.resolve(globalLevel!!)
+            }
+
+            // Now boundplayer2 can be safely used, and it won't be null
+            if (boundplayer2 != null) {
+
+            val tPos = Helper3d.convertShipToWorldSpace(globalLevel!!, pos.toDouble())
            // val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
          //   var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
          //   var tRelative: Vector3d = VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.relativePosition(boundplayer).toJOML()
          //   var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
         //    var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
-            var tMechPos2: Vector3d = boundplayer.resolve(globalLevel)!!.position().toJOML().add(0.0, 3.0, 0.0)
+            var tMechPos2: Vector3d = boundplayer.resolve(globalLevel!!)!!.position().toJOML().add(0.0, 3.0, 0.0)
             var tPID: Vector3d = Vector3d(PIDController(kp = TournamentCommands.xkp, ki = TournamentCommands.xki, kd = TournamentCommands.xkd,).calculateOutput(tPos.x, tMechPos2.x),
                 PIDController(kp = TournamentCommands.ykp, ki = TournamentCommands.yki, kd = TournamentCommands.ykd,).calculateOutput(tPos.y, tMechPos2.y),
                 PIDController(kp = TournamentCommands.zkp, ki = TournamentCommands.zki, kd = TournamentCommands.zkd,).calculateOutput(tPos.z, tMechPos2.z))
@@ -127,7 +137,7 @@ class TournamentShips: ShipForcesInducer {
 
             physShip.applyInvariantForce(tPID)
 
-        }
+        }}
     }
 
     fun addThruster(

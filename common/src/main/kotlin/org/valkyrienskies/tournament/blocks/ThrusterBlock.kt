@@ -5,6 +5,7 @@ import net.minecraft.core.Direction
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
@@ -36,6 +37,7 @@ import org.valkyrienskies.tournament.util.DirectionalShape
 import org.valkyrienskies.tournament.util.PlayerReference
 import org.valkyrienskies.tournament.util.RotShapes
 import org.valkyrienskies.tournament.util.extension.toBlock
+import org.valkyrienskies.tournament.util.extension.toDimensionKey
 import org.valkyrienskies.tournament.util.helper.Helper3d
 import java.util.*
 
@@ -80,13 +82,26 @@ class ThrusterBlock(
         player: Player,
         hand: InteractionHand,
         hit: BlockHitResult
-
     ): InteractionResult {
-        this.boundplayer = player as PlayerReference
-        player.sendMessage(TextComponent("Bound to ${player.name.contents}"), player.uuid)
-        player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
+        val server = player.server
+        if (server != null) {
+            val overworld = server.getLevel(Level.OVERWORLD)
+            val entity = overworld?.getEntity(player.uuid)
+
+            if (entity is ServerPlayer) {
+                boundplayer = PlayerReference.from(entity)
+                player.sendMessage(TextComponent("Bound to ${player.name.contents}"), player.uuid)
+                player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
+            } else {
+                // Handle the case when the entity is not a ServerPlayer
+                // or when overworld is null
+            }
+        } else {
+            // Handle the case when server is null
+        }
+
         return InteractionResult.PASS
-}
+    }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
         builder.add(FACING)
