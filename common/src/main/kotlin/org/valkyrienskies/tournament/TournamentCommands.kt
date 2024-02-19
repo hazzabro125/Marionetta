@@ -19,17 +19,17 @@ import org.valkyrienskies.tournament.ship.TournamentShips
 
 
 object TournamentCommands {
-    var xkp: Double = 25000.0
-    var xki: Double = 0.0
-    var xkd: Double = 0.0
+    var xkp: Double = 12.0
+    var xki: Double = 9.8
+    var xkd: Double = -19.0
 
-    var ykp: Double = 50000.0
-    var yki: Double = 0.0
-    var ykd: Double = 0.0
+    var ykp: Double = 12.0
+    var yki: Double = 9.8
+    var ykd: Double = -19.0
 
-    var zkp: Double = 25000.0
-    var zki: Double = 0.0
-    var zkd: Double = 0.0
+    var zkp: Double = 12.0
+    var zki: Double = 9.8
+    var zkd: Double = -19.0
 
     fun register(dispatcher: CommandDispatcher<CommandSourceStack?>) {
         dispatcher as CommandDispatcher<*>

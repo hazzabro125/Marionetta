@@ -1,6 +1,5 @@
 package org.valkyrienskies.tournament.ship
 
-import org.valkyrienskies.tournament.PIDController
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.google.common.util.concurrent.AtomicDouble
@@ -21,6 +20,7 @@ import org.valkyrienskies.tournament.util.extension.toBlock
 import org.valkyrienskies.tournament.util.extension.toDimensionKey
 import org.valkyrienskies.tournament.util.extension.toDouble
 import org.valkyrienskies.tournament.util.helper.Helper3d
+import org.valkyrienskies.tournament.PIDController
 import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.phys.Vec3
 import org.valkyrienskies.tournament.TournamentCommands
@@ -118,7 +118,7 @@ class TournamentShips: ShipForcesInducer {
 
             // Now boundplayer2 can be safely used, and it won't be null
             if (boundplayer2 != null) {
-
+                val tVel: Vector3d = (physShip.poseVel.vel as Vector3d).mul(physShip.inertia.shipMass)
             val tPos = Helper3d.convertShipToWorldSpace(globalLevel!!, pos.toDouble())
            // val tForce1 = physShip.transform.shipToWorld.transformDirection(force, Vector3d())
          //   var tForce2: Vector3d = ((VRPlugin.vrAPI!!.getVRPlayer(boundplayer).controller0.lookAngle)).toJOML()
@@ -126,16 +126,28 @@ class TournamentShips: ShipForcesInducer {
          //   var tRelativeMechPos: Vector3d = tRelative.mul(2.0)
         //    var tMechPos: Vector3d = tRelativeMechPos.add(boundplayer.position().toJOML())
             var tMechPos2: Vector3d = boundplayer.resolve(globalLevel!!)!!.position().toJOML().add(0.0, 3.0, 0.0)
-            var tPID: Vector3d = Vector3d(PIDController(kp = TournamentCommands.xkp, ki = TournamentCommands.xki, kd = TournamentCommands.xkd,).calculateOutput(tPos.x, tMechPos2.x),
-                PIDController(kp = TournamentCommands.ykp, ki = TournamentCommands.yki, kd = TournamentCommands.ykd,).calculateOutput(tPos.y, tMechPos2.y),
-                PIDController(kp = TournamentCommands.zkp, ki = TournamentCommands.zki, kd = TournamentCommands.zkd,).calculateOutput(tPos.z, tMechPos2.z))
+            var tPID: Vector3d = Vector3d(PIDController(
+                kp = TournamentCommands.xkp * physShip.inertia.shipMass,
+                ki = TournamentCommands.xki * physShip.inertia.shipMass,
+                kd = TournamentCommands.xkd * physShip.inertia.shipMass).calculateOutput(tPos.x, tMechPos2.x),
+                PIDController(
+                    kp = TournamentCommands.ykp * physShip.inertia.shipMass,
+                    ki = TournamentCommands.yki * physShip.inertia.shipMass,
+                    kd = TournamentCommands.ykd * physShip.inertia.shipMass).calculateOutput(tPos.y, tMechPos2.y),
+                PIDController(
+                    kp = TournamentCommands.zkp * physShip.inertia.shipMass,
+                    ki = TournamentCommands.zki * physShip.inertia.shipMass,
+                    kd = TournamentCommands.zkd * physShip.inertia.shipMass).calculateOutput(tPos.z, tMechPos2.z))
 
-            boundplayer2!!.sendMessage(TextComponent("Bound to ${boundplayer2.name.contents}"), boundplayer2.uuid)
-            boundplayer2.sendMessage(TextComponent("$tMechPos2"), boundplayer2.uuid)
-            boundplayer2.sendMessage(TextComponent("$tPID"), boundplayer2.uuid)
-            boundplayer2.sendMessage(TextComponent("$tPos"), boundplayer2.uuid)
+                boundplayer2.sendMessage(TextComponent("Bound to ${boundplayer2.name.contents}"), boundplayer2.uuid)
+                boundplayer2.sendMessage(TextComponent("Desired Pos: $tMechPos2"), boundplayer2.uuid)
+                boundplayer2.sendMessage(TextComponent("Applied Force: $tPID"), boundplayer2.uuid)
+                boundplayer2.sendMessage(TextComponent("Thruster Pos: $tPos"), boundplayer2.uuid)
+                boundplayer2.sendMessage(TextComponent("Current Vel: $tVel"), boundplayer2.uuid)
 
-            physShip.applyInvariantForce(tPID)
+                physShip.applyInvariantForce(tPID)
+                physShip.applyInvariantForce(Vector3d(0.0, physShip.inertia.shipMass * 10, 0.0))
+                physShip.applyInvariantForce(Vector3d(tVel.mul(-1.0)))
 
         }}
     }
@@ -147,6 +159,7 @@ class TournamentShips: ShipForcesInducer {
         boundPlayer: PlayerReference
     ) {
         thrusters += ThrusterData(pos.toJOML(), force, tier, false, boundPlayer)
+
     }
 
     fun addThrusters(
