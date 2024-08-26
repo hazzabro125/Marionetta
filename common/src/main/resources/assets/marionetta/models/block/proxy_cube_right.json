@@ -1,0 +1,24 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [64, 64],
+	"textures": {
+		"0": "marionetta:block/proxy",
+		"particle": "marionetta:block/proxy"
+	},
+	"elements": [
+		{
+			"name": "SubCube",
+			"from": [6.5, 8.5, 6.5],
+			"to": [9.5, 11.5, 9.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6.5, 8.5, 6.5]},
+			"faces": {
+				"north": {"uv": [12, 0, 12.75, 0.75], "texture": "#0"},
+				"east": {"uv": [12, 0, 12.75, 0.75], "texture": "#0"},
+				"south": {"uv": [12, 0, 12.75, 0.75], "texture": "#0"},
+				"west": {"uv": [12, 0, 12.75, 0.75], "texture": "#0"},
+				"up": {"uv": [12.75, 0.75, 12, 0], "texture": "#0"},
+				"down": {"uv": [12.75, 0, 12, 0.75], "texture": "#0"}
+			}
+		}
+	]
+}

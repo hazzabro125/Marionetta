@@ -1,0 +1,28 @@
+{
+  "multipart": [
+    { "when": { "controller": "controller0" },
+    "apply": { "model": "marionetta:block/proxy_cube_right" }
+    },
+    { "when": { "controller": "controller1" },
+    "apply": { "model": "marionetta:block/proxy_cube_left" }
+    },
+    { "when": { "facing": "north" },
+    "apply": { "model": "marionetta:block/proxy", "x": 90 }
+    },
+    { "when": { "facing": "east" },
+    "apply": { "model": "marionetta:block/proxy", "x": 90, "y": 90 }
+    },
+    { "when": { "facing": "south" },
+    "apply": { "model": "marionetta:block/proxy", "x": 270 }
+    },
+    { "when": { "facing": "west" },
+    "apply": { "model": "marionetta:block/proxy", "x": 90, "y": 270 }
+    },
+    { "when": { "facing": "up" },
+    "apply": { "model": "marionetta:block/proxy", "x": 0 }
+    },
+    { "when": { "facing": "down" },
+    "apply": { "model": "marionetta:block/proxy", "x": 180 }
+    }
+  ]
+}

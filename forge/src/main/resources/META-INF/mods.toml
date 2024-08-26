@@ -4,35 +4,31 @@ issueTrackerURL = "https://github.com/ValkyrienSkies/Valkyrien-Skies-2/issues"
 license = "Apache-2.0"
 
 [[mods]]
-modId = "vs_tournament"
+modId = "marionetta"
 version = "${version}"
-displayName = "VS Tournament Mod"
+displayName = "Marionetta"
 authors = [
-    "alex_s168",
-    "ConstantDust",
-    "Illuc",
-    "Percant Pie"
+    "Hazzabro124"
 ]
 description = '''
 
 '''
-logoFile = "../../../../../common/src/main/resources/icon.png"
 
-[[dependencies.vs_tournament]]
+[[dependencies.marionetta]]
 modId = "forge"
 mandatory = true
 versionRange = "[40.2.0,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.vs_tournament]]
+[[dependencies.marionetta]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.18.2,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.vs_tournament]]
+[[dependencies.marionetta]]
 modId = "valkyrienskies"
 mandatory = true
 versionRange = "[${vs2_version},)"

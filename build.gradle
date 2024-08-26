@@ -25,10 +25,10 @@ plugins {
 
 String gitRevision = "git rev-parse HEAD".execute().text.trim()
 if (gitRevision.length() == 0) {
-    version = Tournament_version
+    version = Marionetta_version
 }
 else {
-    version = Tournament_version + '+' + gitRevision.substring(0, 10)
+    version = Marionetta_version + '+' + gitRevision.substring(0, 10)
 }
 
 architectury {
@@ -148,17 +148,17 @@ tasks.register('copyJars') {
     doLast {
         def bl = new File(projectDir, "build/libs")
         copy {
-            from new File(projectDir, "forge/build/libs/tournament-${version}.jar")
+            from new File(projectDir, "forge/build/libs/marionetta-${version}.jar")
             into bl
             rename { String ignored ->
-                "tournament-forge-${version}.jar"
+                "marionetta-forge-${version}.jar"
             }
         }
         copy {
-            from new File(projectDir, "fabric/build/libs/tournament-${version}.jar")
+            from new File(projectDir, "fabric/build/libs/marionetta-${version}.jar")
             into bl
             rename { String ignored ->
-                "tournament-fabric-${version}.jar"
+                "marionetta-fabric-${version}.jar"
             }
         }
     }

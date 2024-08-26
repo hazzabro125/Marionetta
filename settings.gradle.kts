@@ -49,4 +49,4 @@ include("common")
 include("fabric")
 include("forge")
 
-rootProject.name = "vs-Tournament-mod"
+rootProject.name = "marionetta"
