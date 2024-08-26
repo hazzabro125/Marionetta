@@ -82,7 +82,12 @@ class ProxyBlock(
 
             if (entity is ServerPlayer) {
                 boundplayer = PlayerReference.from(entity)
-                player.sendMessage(TextComponent("bound to ${player.name.contents}"), player.uuid)
+                if (player.isShiftKeyDown) {
+                    level.setBlockAndUpdate(pos, state.setValue(MarionettaProperties.CONTROLLER, MarionettaShips.ControllerTypeEnum.controller1))
+                } else {
+                    level.setBlockAndUpdate(pos, state.setValue(MarionettaProperties.CONTROLLER, MarionettaShips.ControllerTypeEnum.controller0))
+                }
+                player.sendMessage(TextComponent("bound to ${player.name.contents}'s ${state.getValue(MarionettaProperties.CONTROLLER)}"), player.uuid)
                 player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
             } else {
                 // TODO Handle the exceptions
