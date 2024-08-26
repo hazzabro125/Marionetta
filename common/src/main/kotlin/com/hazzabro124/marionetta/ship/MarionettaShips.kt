@@ -93,9 +93,6 @@ class MarionettaShips: ShipForcesInducer {
             val (pos, force, boundPlayer, controllerType) = data
             var boundplayer2: ServerPlayer? = null
 
-            var controller = if (controllerType == ControllerTypeEnum.controller1) VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller1
-                else VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller0
-
             // Check if globalLevel is not null before attempting to resolve
             if (globalLevel != null) {
                 boundplayer2 = boundPlayer.resolve(globalLevel!!)
@@ -104,16 +101,29 @@ class MarionettaShips: ShipForcesInducer {
             // Now boundplayer2 can be safely used, and it won't be null
             if (boundplayer2 != null) {
                 if (VRPlugin.vrAPI!!.getVRPlayer(boundplayer2) != null) {
+                    var controller = if (controllerType == ControllerTypeEnum.controller1) VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller1
+                    else VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller0
+
                     val quat4 = Quaterniond().rotateYXZ(
                         toRadians(-VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).hmd.yaw.toDouble()),
                         toRadians(VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).hmd.pitch.toDouble()),
                         toRadians(0.0),
                     )
+
+                    var scale = 4.0
+                    var xOffset = -0.25
+                    var yOffset = 0.25
+                    var zOffset = 0.0
+
+                    if (controllerType == ControllerTypeEnum.controller1) {
+                        xOffset *= -1
+                    }
+
                     var idealPos: Vector3d =
                         VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller0.position().toJOML()
                             .sub(VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).hmd.position().toJOML())
-                            .add(quat4.transform(Vector3d(-0.25, 0.25, 0.0)))
-                            .mul(4.0)
+                            .add(quat4.transform(Vector3d(xOffset, yOffset, zOffset)))
+                            .mul(scale)
                             .add(VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).hmd.position().toJOML())
 
                     val pConst = 160.0
