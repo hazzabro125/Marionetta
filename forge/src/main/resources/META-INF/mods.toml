@@ -1,0 +1,36 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[3.12.0,)"
+issueTrackerURL = "https://github.com/ValkyrienSkies/Valkyrien-Skies-2/issues"
+license = "Apache-2.0"
+
+[[mods]]
+modId = "marionetta"
+version = "${version}"
+displayName = "Marionetta"
+authors = [
+    "Hazzabro124"
+]
+description = '''
+
+'''
+
+[[dependencies.marionetta]]
+modId = "forge"
+mandatory = true
+versionRange = "[40.2.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.marionetta]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.marionetta]]
+modId = "valkyrienskies"
+mandatory = true
+versionRange = "[${vs2_version},)"
+ordering = "AFTER"
+side = "BOTH"

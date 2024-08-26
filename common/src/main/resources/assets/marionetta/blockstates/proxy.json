@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "marionetta:block/proxy",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "marionetta:block/proxy",
+      "y": 90,
+      "x": 90
+
+    },
+    "facing=south": {
+      "model": "marionetta:block/proxy",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "marionetta:block/proxy",
+      "y": 270,
+      "x": 90
+    },
+    "facing=up": {
+      "model": "marionetta:block/proxy",
+      "x": 0
+    },
+    "facing=down": {
+      "model": "marionetta:block/proxy",
+      "x": 180
+    }
+  }
+}
