@@ -51,8 +51,7 @@ class MarionettaShips: ShipForcesInducer {
 
      enum class ControllerTypeEnum(val value:String): StringRepresentable {
          controller0("controller0"),
-         controller1("controller1"),
-         hmd("hmd");
+         controller1("controller1");
 
          override fun getSerializedName(): String {
              return value

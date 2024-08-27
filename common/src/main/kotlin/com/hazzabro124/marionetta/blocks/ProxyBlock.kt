@@ -76,17 +76,18 @@ class ProxyBlock(
         hit: BlockHitResult
     ): InteractionResult {
         val server = player.server
+        val blockState: BlockState;
         if (server != null) {
             val overworld = server.getLevel(Level.OVERWORLD)
             val entity = overworld?.getEntity(player.uuid)
 
             if (entity is ServerPlayer) {
                 boundplayer = PlayerReference.from(entity)
-                if (player.isShiftKeyDown) {
-                    level.setBlockAndUpdate(pos, state.setValue(MarionettaProperties.CONTROLLER, MarionettaShips.ControllerTypeEnum.controller1))
-                } else {
-                    level.setBlockAndUpdate(pos, state.setValue(MarionettaProperties.CONTROLLER, MarionettaShips.ControllerTypeEnum.controller0))
-                }
+
+                blockState = state.cycle(MarionettaProperties.CONTROLLER)
+                level.setBlock(pos, blockState, 3)
+                level.updateNeighborsAt(pos, this)
+
                 player.sendMessage(TextComponent("bound to ${player.name.contents}'s ${state.getValue(MarionettaProperties.CONTROLLER)}"), player.uuid)
                 player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
             } else {
@@ -96,7 +97,7 @@ class ProxyBlock(
             // TODO Handle the other exceptions
         }
 
-        return InteractionResult.PASS
+        return InteractionResult.CONSUME
     }
 
     override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
