@@ -36,9 +36,7 @@ import org.valkyrienskies.mod.common.util.toJOML
 import org.valkyrienskies.mod.common.util.toJOMLD
 import java.util.*
 
-class ProxyBlock(
-    private val mult: () -> Double,
-):DirectionalBlock(
+class ProxyBlock: DirectionalBlock(
     Properties.of(Material.STONE)
         .sound(SoundType.STONE)
         .strength(1.0f,2.0f)
@@ -136,20 +134,30 @@ class ProxyBlock(
         ((level.getShipObjectManagingPos(pos) ?: level.getShipManagingPos(pos)) as?
                 ServerShip)?.let { MarionettaShips.getOrCreate(it) }
 
+    /**
+     * Enables a proxy.
+     * @param level     the [ServerLevel] that contains the proxy to be enabled.
+     * @param position  the posititon of the proxy to be enabled.
+     * @param state     the state of the proxy to enable. Used to confirm power level.
+     * @see disableProxy
+     */
     private fun enableProxy(level: ServerLevel, pos: BlockPos, state: BlockState) {
         getShipControl(level, pos)?.let {
             it.stopProxy(pos)
             it.addProxy(
                 pos,
-                state.getValue(FACING).normal.toJOMLD()
-                    .mul(state.getValue(BlockStateProperties.POWER).toDouble()
-                    * mult()),
                 boundplayer as PlayerReference,
                 state.getValue(MarionettaProperties.CONTROLLER)
             )
         }
     }
 
+    /**
+     * Disables a proxy.
+     * @param level     the [ServerLevel] that contains the proxy to be enabled.
+     * @param position  the posititon of the proxy to be enabled.
+     * @see enableProxy
+     */
     private fun disableProxy(level: ServerLevel, pos: BlockPos) {
         getShipControl(level, pos)?.stopProxy(pos)
     }

@@ -15,11 +15,12 @@ object MarionettaBlocks {
 
     lateinit var PROXY  :RegistrySupplier<ProxyBlock>
 
+    /**
+     * Registers the blocks in Marionetta
+     */
     fun register() {
         PROXY = register("proxy"){
-            ProxyBlock(
-                { 1.0 }
-            )
+            ProxyBlock()
         }
 
         BLOCKS.applyAll()
@@ -31,6 +32,9 @@ object MarionettaBlocks {
         return supplier
     }
 
+    /**
+     * Registers the items associated with the blocks in Marionetta
+     */
     fun registerItems(items: DeferredRegister<Item>) {
         ITEMS.forEach { items.register(it.first, it.second)}
     }

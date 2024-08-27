@@ -2,7 +2,6 @@ package com.hazzabro124.marionetta.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.hazzabro124.marionetta.GravitronForceInducerData
 import com.hazzabro124.marionetta.MarionettaMod
 import com.hazzabro124.marionetta.TickScheduler
 import com.hazzabro124.marionetta.VRPlugin
@@ -42,38 +41,46 @@ class MarionettaShips: ShipForcesInducer {
     @JsonIgnore
     var globalLevel: ServerLevel? = null
 
+    /**
+     * Data class for proxy block.
+     * @property pos            Position of the block in the level ([Vector3i]).
+     * @property boundPlayer    The player bound to the proxy ([PlayerReference]).
+     * @property controllerType The type of VR controller bound to the proxy ([ControllerTypeEnum]).
+     */
     data class ProxyData(
         val pos: Vector3i,
-        val force: Vector3d,
         val boundPlayer: PlayerReference,
         var controllerType: ControllerTypeEnum
     )
 
-     enum class ControllerTypeEnum(val value:String): StringRepresentable {
-         controller0("controller0"),
-         controller1("controller1");
+    /**
+     * Enum specifying VR controller type.
+     */
+    enum class ControllerTypeEnum(val value:String): StringRepresentable {
+        /**
+         * Typically corresponds to right controller
+         */
+        controller0("controller0"),
+        /**
+         * Typically corresponds to left controller
+         */
+        controller1("controller1");
 
-         override fun getSerializedName(): String {
-             return value
-         }
+        override fun getSerializedName(): String {
+            return value
+        }
 
-         companion object {
-             fun fromString(name: String): ControllerTypeEnum {
-                 return values().firstOrNull { it.value == name } ?: controller0
-             }
-         }
+        companion object {
+            fun fromString(name: String): ControllerTypeEnum {
+                return values().firstOrNull { it.value == name } ?: controller0
+            }
+        }
     }
-
-    var data: GravitronForceInducerData? = null
 
     val proxies = CopyOnWriteArrayList<ProxyData>()
 
     @JsonIgnore
     private var ticker: TickScheduler.Ticking? = null
-
-    fun IVRData.relativepositon(boundPlayer: Player): Vec3 {
-        return this.position().subtract(boundPlayer.position())
-    }
 
     override fun applyForces(physShip: PhysShip) {
         physShip as PhysShipImpl
@@ -89,7 +96,7 @@ class MarionettaShips: ShipForcesInducer {
         val vel = physShip.poseVel.vel
 
         proxies.forEach { data ->
-            val (pos, force, boundPlayer, controllerType) = data
+            val (pos, boundPlayer, controllerType) = data
             var boundplayer2: ServerPlayer? = null
 
             // Check if globalLevel is not null before attempting to resolve
@@ -188,30 +195,54 @@ class MarionettaShips: ShipForcesInducer {
         }
     }
 
+    /**
+     * Add proxy to be processed.
+     * @param pos               the position of the proxy ([BlockPos]).
+     * @param boundPlayer       the player bound to the proxy ([PlayerReference]).
+     * @param controllerType    the type of controller bound to the proxy ([ControllerTypeEnum]).
+     * @see addProxies
+     * @see stopProxy
+     */
     fun addProxy(
         pos: BlockPos,
-        force: Vector3d,
         boundPlayer: PlayerReference,
         controllerType: ControllerTypeEnum
     ) {
-        proxies += ProxyData(pos.toJOML(), force, boundPlayer, controllerType)
+        proxies += ProxyData(pos.toJOML(), boundPlayer, controllerType)
     }
 
+    /**
+     * Add multiple proxies to be processed.
+     * @param list the iterable list of proxy data to be added ([Iterable]<[ProxyData]>).
+     * @see addProxy
+     * @see stopProxy
+     */
     fun addProxies(
         list: Iterable<ProxyData>
     ){
-        list.forEach { (pos, force, boundPlayer, controllerType) ->
-            proxies += ProxyData(pos, force, boundPlayer, controllerType)
+        list.forEach { (pos, boundPlayer, controllerType) ->
+            proxies += ProxyData(pos, boundPlayer, controllerType)
         }
     }
 
+    /**
+     * Ceases the processing of a proxy.
+     * @param pos the position of the proxy to stop ([BlockPos]).
+     * @see addProxy
+     * @see addProxies
+     */
     fun stopProxy(
         pos: BlockPos
-    ){
+    ) {
         proxies.removeIf { pos.toJOML() == it.pos }
     }
 
     companion object {
+        /**
+         * Gets or creates a VS ship attachment
+         * @param ship the ship to apply to ([ServerShip]).
+         * @param level the dimension of the ship ([DimensionId]).
+         */
         fun getOrCreate(ship: ServerShip, level: DimensionId) =
             ship.getAttachment<MarionettaShips>()
                 ?: MarionettaShips().also {
@@ -219,6 +250,10 @@ class MarionettaShips: ShipForcesInducer {
                     ship.saveAttachment(it)
                 }
 
+        /**
+         * Gets or creates a VS ship attachment
+         * @param ship the ship to apply to ([ServerShip]).
+         */
         fun getOrCreate(ship: ServerShip): MarionettaShips =
             getOrCreate(ship, ship.chunkClaimDimension)
     }

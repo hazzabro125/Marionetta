@@ -10,6 +10,9 @@ object MarionettaItems {
 
     lateinit var TAB: CreativeModeTab
 
+    /**
+     * Registers the items in Marionetta
+     */
     fun register() {
         MarionettaBlocks.registerItems(ITEMS)
         ITEMS.applyAll()
