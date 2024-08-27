@@ -1,15 +1,11 @@
 .gradle
 **/build/
 !src/**/build/
+.idea
+*/run
 
 # Ignore Gradle GUI config
 gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
-!gradle-wrapper.properties
 
 # Cache of project
 .gradletasknamecache
@@ -45,3 +41,10 @@ gradle-app.setting
 hs_err_pid*
 replay_pid*
 /forge/.gradle/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
