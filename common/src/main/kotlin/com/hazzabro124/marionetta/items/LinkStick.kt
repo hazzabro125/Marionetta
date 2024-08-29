@@ -17,7 +17,7 @@ class LinkStick: Item(
     var savedPos: BlockPos? = null
 
     override fun useOn(context: UseOnContext): InteractionResult {
-        var clickedBlock = context.level.getBlockState(context.clickedPos).block
+        val clickedBlock = context.level.getBlockState(context.clickedPos).block
         if (clickedBlock is ProxyAnchor) {
             savedPos = context.clickedPos
             context.player?.sendMessage(TextComponent("Read position as ${savedPos}"), context.player!!.uuid)

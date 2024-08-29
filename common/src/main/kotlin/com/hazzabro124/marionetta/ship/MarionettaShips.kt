@@ -119,16 +119,16 @@ class MarionettaShips: ShipForcesInducer {
                         toRadians(0.0),
                     )
 
-                    var scale = 4.0
+                    val scale = 4.0
                     var xOffset = -0.25
-                    var yOffset = 0.25
-                    var zOffset = 0.0
+                    val yOffset = 0.25
+                    val zOffset = 0.0
 
                     if (controllerType == ControllerTypeEnum.controller1) {
                         xOffset *= -1
                     }
 
-                    var idealPos: Vector3d =
+                    val idealPos: Vector3d =
                         VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).controller0.position().toJOML()
                             .sub(VRPlugin.vrAPI!!.getVRPlayer(boundplayer2).hmd.position().toJOML())
                             .add(quat4.transform(Vector3d(xOffset, yOffset, zOffset)))
