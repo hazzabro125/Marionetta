@@ -2,21 +2,17 @@ package com.hazzabro124.marionetta.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.hazzabro124.marionetta.MarionettaMod
 import com.hazzabro124.marionetta.TickScheduler
 import com.hazzabro124.marionetta.VRPlugin
+import com.hazzabro124.marionetta.blocks.ProxyAnchor.Companion.anchors
 import com.hazzabro124.marionetta.util.PlayerReference
 import com.hazzabro124.marionetta.util.extension.toDimensionKey
 import com.hazzabro124.marionetta.util.extension.toDouble
-import com.mojang.math.Quaternion
-import net.blf02.vrapi.api.data.IVRData
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.StringRepresentable
-import net.minecraft.world.entity.player.Player
-import net.minecraft.world.phys.Vec3
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.Vector3dc
@@ -50,7 +46,12 @@ class MarionettaShips: ShipForcesInducer {
     data class ProxyData(
         val pos: Vector3i,
         val boundPlayer: PlayerReference,
-        var controllerType: ControllerTypeEnum
+        var controllerType: ControllerTypeEnum,
+        var anchorReference: BlockPos?
+    )
+
+    data class AnchorData(
+        val pos: Vector3i,
     )
 
     /**
@@ -96,8 +97,10 @@ class MarionettaShips: ShipForcesInducer {
         val vel = physShip.poseVel.vel
 
         proxies.forEach { data ->
-            val (pos, boundPlayer, controllerType) = data
+            val (pos, boundPlayer, controllerType,anchorReference) = data
             var boundplayer2: ServerPlayer? = null
+            var linkedAnchor = getAnchor(anchorReference!!.toJOML())
+
 
             // Check if globalLevel is not null before attempting to resolve
             if (globalLevel != null) {
@@ -206,9 +209,10 @@ class MarionettaShips: ShipForcesInducer {
     fun addProxy(
         pos: BlockPos,
         boundPlayer: PlayerReference,
-        controllerType: ControllerTypeEnum
+        controllerType: ControllerTypeEnum,
+        anchorReference: BlockPos?
     ) {
-        proxies += ProxyData(pos.toJOML(), boundPlayer, controllerType)
+        proxies += ProxyData(pos.toJOML(), boundPlayer, controllerType, anchorReference)
     }
 
     /**
@@ -220,8 +224,8 @@ class MarionettaShips: ShipForcesInducer {
     fun addProxies(
         list: Iterable<ProxyData>
     ){
-        list.forEach { (pos, boundPlayer, controllerType) ->
-            proxies += ProxyData(pos, boundPlayer, controllerType)
+        list.forEach { (pos, boundPlayer, controllerType, anchorReference) ->
+            proxies += ProxyData(pos, boundPlayer, controllerType, anchorReference)
         }
     }
 
@@ -236,6 +240,9 @@ class MarionettaShips: ShipForcesInducer {
     ) {
         proxies.removeIf { pos.toJOML() == it.pos }
     }
+        fun getAnchor(pos: Vector3i): MarionettaShips.AnchorData? {
+            return anchors.find{it == MarionettaShips.AnchorData(pos)}
+        }
 
     companion object {
         /**

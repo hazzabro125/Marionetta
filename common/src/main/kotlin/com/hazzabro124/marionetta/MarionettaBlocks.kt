@@ -1,6 +1,8 @@
 package com.hazzabro124.marionetta
 
+import com.hazzabro124.marionetta.blocks.ProxyAnchor
 import com.hazzabro124.marionetta.blocks.ProxyBlock
+import com.hazzabro124.marionetta.items.LinkStick
 import com.hazzabro124.marionetta.registry.DeferredRegister
 import com.hazzabro124.marionetta.registry.RegistrySupplier
 import net.minecraft.core.Registry
@@ -14,6 +16,7 @@ object MarionettaBlocks {
     private val ITEMS = ArrayList<Pair<String, ()-> Item>>()
 
     lateinit var PROXY  :RegistrySupplier<ProxyBlock>
+    lateinit var ANCHOR :RegistrySupplier<ProxyAnchor>
 
     /**
      * Registers the blocks in Marionetta
@@ -21,6 +24,9 @@ object MarionettaBlocks {
     fun register() {
         PROXY = register("proxy"){
             ProxyBlock()
+        }
+        ANCHOR = register("anchor"){
+            ProxyAnchor()
         }
 
         BLOCKS.applyAll()

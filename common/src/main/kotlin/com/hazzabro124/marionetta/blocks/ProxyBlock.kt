@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
@@ -25,7 +24,6 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.level.material.Material
-import net.minecraft.world.level.storage.loot.LootContext
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.VoxelShape
@@ -33,7 +31,6 @@ import org.valkyrienskies.core.api.ships.ServerShip
 import org.valkyrienskies.mod.common.getShipManagingPos
 import org.valkyrienskies.mod.common.getShipObjectManagingPos
 import org.valkyrienskies.mod.common.util.toJOML
-import org.valkyrienskies.mod.common.util.toJOMLD
 import java.util.*
 
 class ProxyBlock: DirectionalBlock(
@@ -47,6 +44,8 @@ class ProxyBlock: DirectionalBlock(
     private val Proxy_SHAPE = DirectionalShape.up(RotShapes.or(BASE, BOX))
 
     private var boundplayer: PlayerReference? = null
+
+    var linkedAnchor: BlockPos? = null
 
     init {
         registerDefaultState(
@@ -117,7 +116,7 @@ class ProxyBlock: DirectionalBlock(
         }
 
         if (signal > 0) {
-            enableProxy(level, pos, state)
+            enableProxy(level, pos, state, linkedAnchor)
         }
     }
 
@@ -141,13 +140,14 @@ class ProxyBlock: DirectionalBlock(
      * @param state     the state of the proxy to enable. Used to confirm power level.
      * @see disableProxy
      */
-    private fun enableProxy(level: ServerLevel, pos: BlockPos, state: BlockState) {
+    private fun enableProxy(level: ServerLevel, pos: BlockPos, state: BlockState, anchorReference: BlockPos?) {
         getShipControl(level, pos)?.let {
             it.stopProxy(pos)
             it.addProxy(
                 pos,
                 boundplayer as PlayerReference,
-                state.getValue(MarionettaProperties.CONTROLLER)
+                state.getValue(MarionettaProperties.CONTROLLER),
+                anchorReference
             )
         }
     }
