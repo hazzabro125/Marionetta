@@ -61,7 +61,7 @@ subprojects {
             parchment("org.parchmentmc.data:parchment-1.18.2:2022.09.04@zip")
         })
         modApi ("curse.maven:mcvrapi-591092:5032461")
-        implementation ("curse.maven:mcvrapi-591092:5032461")
+        modImplementation ("curse.maven:mcvrapi-591092:5032461")
         implementation("org.joml:joml:1.10.4") { transitive = false }
         implementation("org.joml:joml-primitives:1.10.0") { transitive = false }
     }
