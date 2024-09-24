@@ -61,6 +61,8 @@ dependencies {
     implementation "thedarkcolour:kotlinforforge:$forge_kotlin_version"
 
     modImplementation("curse.maven:cc-tweaked-282001:4630521")
+
+    modImplementation files("${rootProject.rootDir}/libs/vivecraft-1.18.2-1.1.13-forge.jar")
 }
 
 processResources {
