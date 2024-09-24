@@ -1,32 +1,19 @@
 package com.hazzabro124.marionetta.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.hazzabro124.marionetta.TickScheduler
-import com.hazzabro124.marionetta.VRPlugin
-import com.hazzabro124.marionetta.blocks.ProxyAnchor.Companion.anchors
-import com.hazzabro124.marionetta.util.PlayerReference
-import com.hazzabro124.marionetta.util.extension.toDimensionKey
 import com.hazzabro124.marionetta.util.extension.toDouble
 import net.blf02.vrapi.api.data.IVRPlayer
-import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.TextComponent
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.util.StringRepresentable
 import org.joml.Quaterniond
 import org.joml.Vector3d
-import org.joml.Vector3dc
 import org.joml.Vector3i
 import org.valkyrienskies.core.api.ships.*
-import org.valkyrienskies.core.apigame.world.properties.DimensionId
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.util.pollUntilEmpty
 import org.valkyrienskies.mod.common.util.toJOML
 import java.lang.Math.toRadians
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.CopyOnWriteArrayList
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -42,12 +29,9 @@ class MarionettaShips: ShipForcesInducer {
      * @property pos            Position of the proxy block on a Ship ([Vector3i])
      * @property idealPos       The ideal Ship position ([Vector3d])
      * @property vrPlayer       The VRPlayer bound to the proxy ([IVRPlayer])
+     * @property anchorPos       The the position of the proxy's linked anchor or null ([Vector3i])
      */
-    data class ProxyUpdateData(val pos: Vector3i, val idealPos: Vector3d, val vrPlayer: IVRPlayer)
-
-    data class AnchorData(
-        val pos: Vector3i,
-    )
+    data class ProxyUpdateData(val pos: Vector3i, val idealPos: Vector3d, val vrPlayer: IVRPlayer, val anchorPos: Vector3i?)
 
     /**
      * Enum specifying VR controller type.
@@ -80,7 +64,7 @@ class MarionettaShips: ShipForcesInducer {
 
         val vel = physShip.poseVel.vel
 
-        proxyUpdates.pollUntilEmpty { (pos, idealPos, vrPlayer) ->
+        proxyUpdates.pollUntilEmpty { (pos, idealPos, vrPlayer, anchorPos) ->
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
                 pos.toDouble().add(0.5, 0.5, 0.5), Vector3d())
             val idealPosDiff = idealPos.sub(localGrabPos, Vector3d())
@@ -123,13 +107,15 @@ class MarionettaShips: ShipForcesInducer {
      * @param pos               the position of the proxy ([BlockPos]).
      * @param idealPos          the ideal position of the Ship ([Vector3d]).
      * @param vrPlayer          the instance of an IVRPlayer bound to the proxy ([IVRPlayer]).
+     * @param anchorPos       The the position of the proxy's linked anchor or null ([Vector3i])
      */
     fun addProxy(
         pos: BlockPos,
         idealPos: Vector3d,
-        vrPlayer: IVRPlayer
+        vrPlayer: IVRPlayer,
+        anchorPos: BlockPos?
     ) {
-        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), idealPos, vrPlayer))
+        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), idealPos, vrPlayer, anchorPos?.toJOML()))
     }
 
     companion object {

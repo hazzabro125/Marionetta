@@ -1,5 +1,8 @@
 package com.hazzabro124.marionetta
 
+import com.hazzabro124.marionetta.blocks.MarionettaBlockEntities
+import com.hazzabro124.marionetta.blocks.MarionettaBlocks
+import com.hazzabro124.marionetta.items.MarionettaItems
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.world.level.block.entity.BlockEntity

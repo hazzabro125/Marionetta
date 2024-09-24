@@ -29,7 +29,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:1.10.10+kotlin.1.9.10")
 
     modImplementation ("curse.maven:mc-vr-api-591092:5032460")
-    modImplementation ("curse.maven:architectury-api-419699:4521464")
+    include(modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}")
 
     // Mod menu
     modImplementation("com.terraformersmc:modmenu:3.2.3")

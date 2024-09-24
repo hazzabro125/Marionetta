@@ -1,8 +1,9 @@
 package com.hazzabro124.marionetta.blocks.entity
 
-import com.hazzabro124.marionetta.MarionettaBlockEntities
+import com.hazzabro124.marionetta.blocks.MarionettaBlockEntities
 import com.hazzabro124.marionetta.MarionettaProperties
 import com.hazzabro124.marionetta.VRPlugin
+import com.hazzabro124.marionetta.blocks.custom.ProxyAnchorBlock
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
@@ -21,6 +22,7 @@ import java.util.UUID
 
 class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(MarionettaBlockEntities.PROXY.get(), pos, state) {
     var boundPlayer: UUID? = null
+    var anchorPos: BlockPos? = null
 
     fun bindPlayer(player: Player) {
         if (VRPlugin.vrAPI?.playerInVR(player) != true) return
@@ -28,9 +30,31 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
         this.setChanged()
     }
 
+    fun linkAnchor(pos: BlockPos) {
+        anchorPos = pos
+        this.setChanged()
+    }
+
+    fun getAndValidateAnchor(level: ServerLevel): BlockPos? {
+        if (anchorPos == null) return null
+        if (level.isLoaded(anchorPos!!)) return null
+
+        val state = level.getBlockState(anchorPos!!)
+        if (state.block !is ProxyAnchorBlock) {
+            anchorPos = null
+            this.setChanged()
+            return anchorPos
+        }
+        if (state.getValue(BlockStateProperties.POWER) <= 0) return null
+
+        return anchorPos!!
+    }
+
     override fun saveAdditional(tag: CompoundTag) {
         if (boundPlayer != null)
             tag.putUUID("marionetta\$player", boundPlayer!!)
+        if (anchorPos != null)
+            tag.putLong("marionetta\$anchorPos", anchorPos!!.asLong())
 
         super.saveAdditional(tag)
     }
@@ -40,6 +64,8 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
 
         if (tag.contains("marionetta\$player"))
             boundPlayer = tag.getUUID("marionetta\$player")
+        if (tag.contains("marionetta\$anchorPos"))
+            anchorPos = BlockPos.of(tag.getLong("marionetta\$anchorPos"))
     }
 
     companion object {
@@ -82,7 +108,7 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
                     .add(vrPlayer.hmd.position().toJOML())
 
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.proxyUpdates.add(MarionettaShips.ProxyUpdateData(pos.toJOML(), idealPos, vrPlayer))
+            forcesApplier.addProxy(pos, idealPos, vrPlayer, proxy.getAndValidateAnchor(level))
         }
     }
 }

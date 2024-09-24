@@ -1,4 +1,4 @@
-package com.hazzabro124.marionetta.blocks
+package com.hazzabro124.marionetta.blocks.custom
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
@@ -18,7 +18,7 @@ import com.hazzabro124.marionetta.ship.MarionettaShips
 import java.util.concurrent.CopyOnWriteArrayList
 
 
-class ProxyAnchor(
+class ProxyAnchorBlock(
 ) : DirectionalBlock(
     Properties.of(Material.STONE)
         .sound(SoundType.STONE)
@@ -53,22 +53,7 @@ class ProxyAnchor(
             level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.POWER, signal))
             return
         }
-
-        if (signal > 0) {
-            enableAnchor(level, pos, state)
-        }
     }
-
-    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
-        if (level !is ServerLevel) return
-
-        super.onRemove(state, level, pos, newState, isMoving)
-    }
-
-    private fun enableAnchor(level: ServerLevel, pos: BlockPos, state: BlockState) {
-            stopAnchor(pos)
-            addAnchor(pos)
-        }
 
     override fun neighborChanged(
         state: BlockState,
@@ -98,20 +83,5 @@ class ProxyAnchor(
 
         return defaultBlockState()
             .setValue(BlockStateProperties.FACING, dir)
-    }
-    companion object {
-        val anchors = CopyOnWriteArrayList<MarionettaShips.AnchorData>()
-
-        fun addAnchor(
-            pos: BlockPos,
-        ) {
-            anchors += MarionettaShips.AnchorData(pos.toJOML())
-        }
-        fun stopAnchor(
-            pos: BlockPos
-        ) {
-            anchors.removeIf { pos.toJOML() == it.pos }
-        }
-
     }
 }

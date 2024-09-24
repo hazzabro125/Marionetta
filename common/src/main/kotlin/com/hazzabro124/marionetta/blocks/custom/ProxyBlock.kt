@@ -1,17 +1,14 @@
-package com.hazzabro124.marionetta.blocks
+package com.hazzabro124.marionetta.blocks.custom
 
-import com.hazzabro124.marionetta.MarionettaBlockEntities
+import com.hazzabro124.marionetta.blocks.MarionettaBlockEntities
 import com.hazzabro124.marionetta.MarionettaProperties
 import com.hazzabro124.marionetta.blocks.entity.ProxyBlockEntity
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import com.hazzabro124.marionetta.util.DirectionalShape
-import com.hazzabro124.marionetta.util.PlayerReference
 import com.hazzabro124.marionetta.util.RotShapes
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.player.Player
@@ -33,11 +30,6 @@ import net.minecraft.world.level.material.Material
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.VoxelShape
-import org.valkyrienskies.core.api.ships.ServerShip
-import org.valkyrienskies.mod.common.getShipManagingPos
-import org.valkyrienskies.mod.common.getShipObjectManagingPos
-import org.valkyrienskies.mod.common.util.toJOML
-import java.util.*
 
 class ProxyBlock: DirectionalBlock(
     Properties.of(Material.STONE)
@@ -48,8 +40,6 @@ class ProxyBlock: DirectionalBlock(
     private val BOX = RotShapes.box(3.0, 5.0, 3.0, 13.0, 15.0, 13.0)
 
     private val PROXY_SHAPE = DirectionalShape.up(RotShapes.or(BASE, BOX))
-
-    var linkedAnchor: BlockPos? = null
 
     init {
         registerDefaultState(
@@ -88,7 +78,9 @@ class ProxyBlock: DirectionalBlock(
             be.bindPlayer(player)
 
         val newState = state.cycle(MarionettaProperties.CONTROLLER)
-        level.setBlockAndUpdate(pos, newState)
+        level.setBlock(pos, newState, 3)
+        level.updateNeighborsAt(pos, this)
+        //level.setBlockAndUpdate(pos, newState)
         
         return InteractionResult.CONSUME
     }
