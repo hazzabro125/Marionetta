@@ -16,6 +16,7 @@ object MarionettaMod {
         VSConfigClass.registerConfig(MOD_ID, MarionettaConfig::class.java)
         MarionettaBlocks.register()
         MarionettaItems.register()
+        MarionettaBlockEntities.register()
 
         VSEvents.shipLoadEvent.on { e ->
             val ship = e.ship
