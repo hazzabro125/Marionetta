@@ -1,6 +1,8 @@
 package com.hazzabro124.marionetta.blocks
 
+import com.hazzabro124.marionetta.MarionettaBlockEntities
 import com.hazzabro124.marionetta.MarionettaProperties
+import com.hazzabro124.marionetta.blocks.entity.ProxyBlockEntity
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import com.hazzabro124.marionetta.util.DirectionalShape
 import com.hazzabro124.marionetta.util.PlayerReference
@@ -18,8 +20,12 @@ import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.DirectionalBlock
+import net.minecraft.world.level.block.EntityBlock
 import net.minecraft.world.level.block.RenderShape
 import net.minecraft.world.level.block.SoundType
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityTicker
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
@@ -37,13 +43,11 @@ class ProxyBlock: DirectionalBlock(
     Properties.of(Material.STONE)
         .sound(SoundType.STONE)
         .strength(1.0f,2.0f)
-) {
+), EntityBlock {
     private val BASE = RotShapes.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0)
     private val BOX = RotShapes.box(3.0, 5.0, 3.0, 13.0, 15.0, 13.0)
 
-    private val Proxy_SHAPE = DirectionalShape.up(RotShapes.or(BASE, BOX))
-
-    private var boundplayer: PlayerReference? = null
+    private val PROXY_SHAPE = DirectionalShape.up(RotShapes.or(BASE, BOX))
 
     var linkedAnchor: BlockPos? = null
 
@@ -56,14 +60,17 @@ class ProxyBlock: DirectionalBlock(
         )
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getRenderShape(state: BlockState): RenderShape {
         return RenderShape.MODEL
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getShape(state: BlockState, level: BlockGetter, pos: BlockPos, context: CollisionContext): VoxelShape {
-        return Proxy_SHAPE[state.getValue(BlockStateProperties.FACING)]
+        return PROXY_SHAPE[state.getValue(BlockStateProperties.FACING)]
     }
 
+    @Deprecated("Deprecated in Java")
     override fun use(
         state: BlockState,
         level: Level,
@@ -72,28 +79,17 @@ class ProxyBlock: DirectionalBlock(
         hand: InteractionHand,
         hit: BlockHitResult
     ): InteractionResult {
-        val server = player.server
-        val blockState: BlockState;
-        if (server != null) {
-            val overworld = server.getLevel(Level.OVERWORLD)
-            val entity = overworld?.getEntity(player.uuid)
+        if (level.isClientSide) return InteractionResult.sidedSuccess(true)
+        
+        val be = level.getBlockEntity(pos)
+        if (be !is ProxyBlockEntity) return InteractionResult.FAIL
+        
+        if (be.boundPlayer != player.uuid) 
+            be.bindPlayer(player)
 
-            if (entity is ServerPlayer) {
-                boundplayer = PlayerReference.from(entity)
-
-                blockState = state.cycle(MarionettaProperties.CONTROLLER)
-                level.setBlock(pos, blockState, 3)
-                level.updateNeighborsAt(pos, this)
-
-                player.sendMessage(TextComponent("bound to ${player.name.contents}'s ${state.getValue(MarionettaProperties.CONTROLLER)}"), player.uuid)
-                player.sendMessage(TextComponent("${(player.lookAngle).toJOML()}"), player.uuid)
-            } else {
-                // TODO Handle the exceptions
-            }
-        } else {
-            // TODO Handle the other exceptions
-        }
-
+        val newState = state.cycle(MarionettaProperties.CONTROLLER)
+        level.setBlockAndUpdate(pos, newState)
+        
         return InteractionResult.CONSUME
     }
 
@@ -114,52 +110,6 @@ class ProxyBlock: DirectionalBlock(
             level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.POWER, signal))
             return
         }
-
-        if (signal > 0) {
-            enableProxy(level, pos, state, linkedAnchor)
-        }
-    }
-
-    override fun onRemove(state: BlockState, level: Level, pos: BlockPos, newState: BlockState, isMoving: Boolean) {
-        if (level !is ServerLevel) return
-
-        disableProxy(level, pos)
-
-        super.onRemove(state, level, pos, newState, isMoving)
-    }
-
-
-    private fun getShipControl(level: Level, pos: BlockPos) =
-        ((level.getShipObjectManagingPos(pos) ?: level.getShipManagingPos(pos)) as?
-                ServerShip)?.let { MarionettaShips.getOrCreate(it) }
-
-    /**
-     * Enables a proxy.
-     * @param level     the [ServerLevel] that contains the proxy to be enabled.
-     * @param position  the posititon of the proxy to be enabled.
-     * @param state     the state of the proxy to enable. Used to confirm power level.
-     * @see disableProxy
-     */
-    private fun enableProxy(level: ServerLevel, pos: BlockPos, state: BlockState, anchorReference: BlockPos?) {
-        getShipControl(level, pos)?.let {
-            it.stopProxy(pos)
-            it.addProxy(
-                pos,
-                boundplayer as PlayerReference,
-                state.getValue(MarionettaProperties.CONTROLLER),
-                anchorReference
-            )
-        }
-    }
-
-    /**
-     * Disables a proxy.
-     * @param level     the [ServerLevel] that contains the proxy to be enabled.
-     * @param position  the posititon of the proxy to be enabled.
-     * @see enableProxy
-     */
-    private fun disableProxy(level: ServerLevel, pos: BlockPos) {
-        getShipControl(level, pos)?.stopProxy(pos)
     }
 
     override fun neighborChanged(
@@ -178,8 +128,7 @@ class ProxyBlock: DirectionalBlock(
         val prev = state.getValue(BlockStateProperties.POWER)
 
         if (signal == prev) return
-
-        disableProxy(level, pos)
+        
         level.setBlockAndUpdate(pos, state.setValue(BlockStateProperties.POWER, signal))
     }
 
@@ -192,5 +141,15 @@ class ProxyBlock: DirectionalBlock(
         return defaultBlockState()
             .setValue(BlockStateProperties.FACING, dir)
 
+    }
+
+    override fun newBlockEntity(pos: BlockPos, state: BlockState) = ProxyBlockEntity(pos, state)
+
+    override fun <T : BlockEntity> getTicker(
+        level: Level,
+        state: BlockState,
+        blockEntityType: BlockEntityType<T>
+    ): BlockEntityTicker<T>? {
+        return if (blockEntityType == MarionettaBlockEntities.PROXY.get()) BlockEntityTicker<T>(ProxyBlockEntity::tick) else null
     }
 }
