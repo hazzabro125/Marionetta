@@ -123,7 +123,7 @@ class MarionettaShips: ShipForcesInducer {
                     physShip.transform.shipToWorldRotation.transformInverse(
                         rotDiffVector, Vector3d())))
             println("Applied Torque: $torque")
-            physShip.applyInvariantForce(torque)
+            physShip.applyInvariantTorque(torque)
         }
     }
 
