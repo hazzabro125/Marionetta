@@ -83,6 +83,13 @@ class MarionettaShips: ShipForcesInducer {
                 else -> vrPlayer.controller1
             }
 
+            val anchorRot = anchorDirection?.let { direction ->
+                Quaterniond().rotateYXZ(
+                    toRadians(-direction.y),
+                    toRadians(direction.x),
+                    toRadians(direction.z)
+                ) }
+
             val headQuat = Quaterniond()
             anchorDirection?.let { direction ->
                 headQuat.rotateYXZ(
@@ -99,7 +106,7 @@ class MarionettaShips: ShipForcesInducer {
             val idealPos: Vector3d =
                 controller.position().toJOML()
                     .sub(vrPlayer.hmd.position().toJOML())
-                    .add(headQuat.transform(Vector3d(settings.xOffset, settings.yOffset, settings.zOffset)))
+                    .add((anchorRot ?: headQuat).transform(Vector3d(settings.xOffset, settings.yOffset, settings.zOffset)))
                     .mul(settings.scale)
                     .add(anchorPos?.toDouble()?.add(0.5, 0.5, 0.5) ?: vrPlayer.hmd.position().toJOML())
 
@@ -119,19 +126,11 @@ class MarionettaShips: ShipForcesInducer {
 
 
 
-            var handQuat = Quaterniond().rotateYXZ(
+            val handQuat = Quaterniond().rotateYXZ(
                 toRadians(-controller.yaw.toDouble()),
                 toRadians(-controller.pitch.toDouble()),
                 toRadians(controller.roll.toDouble())
             ) ?: return@pollUntilEmpty
-
-            if (anchorDirection != null) {
-                handQuat = handQuat.difference(headQuat).add(Quaterniond().rotateYXZ(
-                    toRadians(-anchorDirection.y),
-                    toRadians(anchorDirection.x),
-                    toRadians(anchorDirection.z)
-                ))
-            }
 
             val rotDiff = handQuat.mul(physShip.transform.shipToWorldRotation.invert(Quaterniond()), Quaterniond())
                 .normalize().invert()
