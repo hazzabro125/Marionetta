@@ -35,7 +35,16 @@ class MarionettaShips: ShipForcesInducer {
      * @property controllerType The selected controller ([ControllerTypeEnum]).
      * @property anchorPos      The position of the proxy's linked anchor or null ([Vector3i])
      */
-    data class ProxyUpdateData(val pos: Vector3i, val vrPlayer: IVRPlayer, val controllerType: ControllerTypeEnum, val anchorPos: Vector3i?, val anchorDirection: Vector3d?)
+    data class ProxyUpdateData(val pos: Vector3i, val vrPlayer: IVRPlayer, val controllerType: ControllerTypeEnum, val anchorPos: Vector3i?, val anchorDirection: Vector3d?, val settings: ProxySettings = ProxySettings())
+
+    /**
+     * Data class for proxy block settings
+     * @property scale
+     * @property xOffset
+     * @property yOffset
+     * @property zOffset
+     */
+    data class ProxySettings(val scale: Double = 4.0, val xOffset: Double = -0.25, val yOffset: Double = 0.25, val zOffset: Double = 0.0)
 
     /**
      * Enum specifying VR controller type.
@@ -68,7 +77,7 @@ class MarionettaShips: ShipForcesInducer {
 
         val vel = physShip.poseVel.vel
 
-        proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos, anchorDirection) ->
+        proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos, anchorDirection, settings) ->
             val controller = when(controllerType) {
                 ControllerTypeEnum.controller0 -> vrPlayer.controller0
                 else -> vrPlayer.controller1
@@ -87,13 +96,11 @@ class MarionettaShips: ShipForcesInducer {
                 toRadians(0.0)
             )
 
-            val localXOffset = if (controllerType == ControllerTypeEnum.controller1) xOffset * -1 else xOffset
-
             val idealPos: Vector3d =
                 controller.position().toJOML()
                     .sub(vrPlayer.hmd.position().toJOML())
-                    .add(headQuat.transform(Vector3d(localXOffset, yOffset, zOffset)))
-                    .mul(scale)
+                    .add(headQuat.transform(Vector3d(settings.xOffset, settings.yOffset, settings.zOffset)))
+                    .mul(settings.scale)
                     .add(anchorPos?.toDouble()?.add(0.5, 0.5, 0.5) ?: vrPlayer.hmd.position().toJOML())
 
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
@@ -142,23 +149,20 @@ class MarionettaShips: ShipForcesInducer {
      * @param vrPlayer          The bound VRPlayer instance ([IVRPlayer])
      * @param controllerType    The selected controller ([ControllerTypeEnum]).
      * @param anchorPos         the position of the proxy's linked anchor or null ([Vector3i])
+     * @param settings          the settings for the proxy ([ProxySettings])
      */
     fun addProxy(
         pos: BlockPos,
         vrPlayer: IVRPlayer,
         controllerType: ControllerTypeEnum,
-        anchorPos: BlockPos?,
-        anchorDirection: Vector3d?
+        anchorPos: BlockPos? = null,
+        anchorDirection: Vector3d? = null,
+        settings: ProxySettings = ProxySettings()
     ) {
-        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), vrPlayer, controllerType, anchorPos?.toJOML(), anchorDirection))
+        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), vrPlayer, controllerType, anchorPos?.toJOML(), anchorDirection, settings))
     }
 
     companion object {
-        const val scale = 4.0
-        const val xOffset = -0.25
-        const val yOffset = 0.25
-        const val zOffset = 0.0
-
         const val pConst = 160.0
         const val dConst = 20.0
         const val pConstR = 160.0

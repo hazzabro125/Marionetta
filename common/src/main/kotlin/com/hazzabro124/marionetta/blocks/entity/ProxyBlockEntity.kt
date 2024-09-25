@@ -104,8 +104,13 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
             }
 
             val controllerType = state.getValue(MarionettaProperties.CONTROLLER)
+            val settings = when (controllerType) {
+                MarionettaShips.ControllerTypeEnum.controller1 -> MarionettaShips.ProxySettings(xOffset = -0.25 * -1.0)
+                else -> MarionettaShips.ProxySettings()
+            }
+
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos, anchorDirection)
+            forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos, anchorDirection, settings)
         }
     }
 }
