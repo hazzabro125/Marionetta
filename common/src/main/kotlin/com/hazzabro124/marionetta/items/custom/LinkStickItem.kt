@@ -27,10 +27,12 @@ class LinkStickItem: Item(
                 context.player?.sendMessage(TextComponent("No Position Saved!"), context.player!!.uuid)
                 return InteractionResult.FAIL
             }
+            context.player?.sendMessage(TextComponent("Loading position as ${savedPos}"), context.player!!.uuid)
             val be = context.level.getBlockEntity(context.clickedPos)
-            if (be is ProxyBlockEntity)
+            if (be is ProxyBlockEntity) {
                 be.linkAnchor(savedPos)
-            else
+                context.player?.sendMessage(TextComponent("Link Successful!"), context.player!!.uuid)
+            }else
                 return InteractionResult.FAIL
         }
         return InteractionResult.SUCCESS

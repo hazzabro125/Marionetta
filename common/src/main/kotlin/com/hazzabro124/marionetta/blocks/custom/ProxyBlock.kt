@@ -72,6 +72,8 @@ class ProxyBlock: DirectionalBlock(
     ): InteractionResult {
         if (level.isClientSide)
             return InteractionResult.sidedSuccess(true)
+
+        if (!player.getItemInHand(hand).isEmpty) return InteractionResult.PASS
         
         val be = level.getBlockEntity(pos)
         if (be !is ProxyBlockEntity) return InteractionResult.FAIL
