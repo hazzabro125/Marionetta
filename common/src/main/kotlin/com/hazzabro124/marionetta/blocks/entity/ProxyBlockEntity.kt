@@ -5,6 +5,7 @@ import com.hazzabro124.marionetta.MarionettaProperties
 import com.hazzabro124.marionetta.VRPlugin
 import com.hazzabro124.marionetta.blocks.custom.ProxyAnchorBlock
 import com.hazzabro124.marionetta.ship.MarionettaShips
+import com.hazzabro124.marionetta.util.extension.toBlock
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.TextComponent
@@ -18,6 +19,7 @@ import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.valkyrienskies.mod.common.getShipObjectManagingPos
 import org.valkyrienskies.mod.common.util.toJOML
+import org.valkyrienskies.mod.common.util.toJOMLD
 import java.lang.Math.toRadians
 import java.util.UUID
 
@@ -88,9 +90,13 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
             // If player not in VR or VRAPI is null, return
             val vrPlayer = VRPlugin.vrAPI?.getVRPlayer(player) ?: return
 
+            val anchorPos = proxy.getAndValidateAnchor(level)?.let { anchor ->
+                level.getShipObjectManagingPos(anchor)?.shipToWorld?.transformPosition(anchor.toJOMLD())?.toBlock() ?: anchor
+            }
+
             val controllerType = state.getValue(MarionettaProperties.CONTROLLER)
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.addProxy(pos, vrPlayer, controllerType, proxy.getAndValidateAnchor(level))
+            forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos)
         }
     }
 }

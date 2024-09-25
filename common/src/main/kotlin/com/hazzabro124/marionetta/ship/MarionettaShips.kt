@@ -87,7 +87,7 @@ class MarionettaShips: ShipForcesInducer {
                     .sub(vrPlayer.hmd.position().toJOML())
                     .add(headQuat.transform(Vector3d(localXOffset, yOffset, zOffset)))
                     .mul(scale)
-                    .add(anchorPos?.toBlockPos()?.toJOMLD() ?: vrPlayer.hmd.position().toJOML())
+                    .add(anchorPos?.toDouble()?.add(0.5, 0.5, 0.5) ?: vrPlayer.hmd.position().toJOML())
 
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
                 pos.toDouble().add(0.5, 0.5, 0.5), Vector3d())
