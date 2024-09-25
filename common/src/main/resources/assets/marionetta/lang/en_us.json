@@ -1,5 +1,10 @@
 {
   "block.marionetta.proxy": "Proxy",
-  "itemGroup.marionetta.proxy": "Marionetta",
-  "item.marionetta.proxy": "Proxy"
+  "block.marionetta.anchor": "Anchor",
+
+  "itemGroup.marionetta.main_tab": "Marionetta",
+
+  "item.marionetta.proxy": "Proxy",
+  "item.marionetta.anchor": "Anchor",
+  "item.marionetta.link_stick": "Link Stick"
 }

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "marionetta",
+  "version": "${version}",
+  "name": "Marionetta",
+  "description": "",
+  "authors": [
+    "Hazzabro124"
+  ],
+  "contact": {
+    "homepage": "https://valkyrienskies.org/",
+    "sources": "https://github.com/ValkyrienSkies/Tournament"
+  },
+  "license": "Apache-2.0",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric${'$'}Client"
+      }
+    ],
+    "preLaunch": [
+      "com.hazzabro124.marionetta.fabric.ValkyrienPreLaunch"
+    ],
+    "modmenu": [
+      {
+        "adapter": "kotlin",
+        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric${'$'}ModMenu"
+      }
+    ]
+  },
+  "mixins": [
+    "marionetta-common.mixins.json",
+    "marionetta.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "=1.18.2",
+    "valkyrienskies": ">=${vs2_version}",
+    "fabricloader": ">=0.14.21"
+  }
+}

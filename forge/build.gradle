@@ -28,6 +28,7 @@ loom {
 
     forge {
         convertAccessWideners = true
+        mixinConfig "marionetta-common.mixins.json"
         mixinConfig "marionetta.mixins.json"
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
     }
@@ -44,7 +45,8 @@ configurations {
 dependencies {
     forge "net.minecraftforge:forge:$forge_version"
     modImplementation ("curse.maven:mc-vr-api-591092:5032461")
-    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    include(modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}")
+
     modApi("org.valkyrienskies:valkyrienskies-118-forge:$vs2_version") { transitive = false }
 
     implementation("org.valkyrienskies.core:api:$vs_core_version")
