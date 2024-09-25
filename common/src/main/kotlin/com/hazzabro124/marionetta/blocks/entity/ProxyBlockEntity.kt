@@ -85,6 +85,10 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
             val vrPlayer = VRPlugin.vrAPI?.getVRPlayer(player) ?: return
 
             val controllerType = state.getValue(MarionettaProperties.CONTROLLER)
+            val controller = when(controllerType) {
+                MarionettaShips.ControllerTypeEnum.controller0 -> vrPlayer.controller0
+                else -> vrPlayer.controller1
+            }
 
             val quat = Quaterniond().rotateYXZ(
                 toRadians(-vrPlayer.hmd.yaw.toDouble()),
@@ -101,14 +105,14 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
                 xOffset *= -1
 
             val idealPos: Vector3d =
-                vrPlayer.controller0.position().toJOML()
+                controller.position().toJOML()
                     .sub(vrPlayer.hmd.position().toJOML())
                     .add(quat.transform(Vector3d(xOffset, yOffset, zOffset)))
                     .mul(scale)
                     .add(vrPlayer.hmd.position().toJOML())
 
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.addProxy(pos, idealPos, vrPlayer, proxy.getAndValidateAnchor(level))
+            forcesApplier.addProxy(pos, idealPos, controller, proxy.getAndValidateAnchor(level))
         }
     }
 }

@@ -2,6 +2,7 @@ package com.hazzabro124.marionetta.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.hazzabro124.marionetta.util.extension.toDouble
+import net.blf02.vrapi.api.data.IVRData
 import net.blf02.vrapi.api.data.IVRPlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.util.StringRepresentable
@@ -28,10 +29,10 @@ class MarionettaShips: ShipForcesInducer {
      * Data class for proxy block updates.
      * @property pos            Position of the proxy block on a Ship ([Vector3i])
      * @property idealPos       The ideal Ship position ([Vector3d])
-     * @property vrPlayer       The VRPlayer bound to the proxy ([IVRPlayer])
-     * @property anchorPos       The the position of the proxy's linked anchor or null ([Vector3i])
+     * @property controller     The instance of a bound VRPlayer's bound controller ([IVRData]).
+     * @property anchorPos      The position of the proxy's linked anchor or null ([Vector3i])
      */
-    data class ProxyUpdateData(val pos: Vector3i, val idealPos: Vector3d, val vrPlayer: IVRPlayer, val anchorPos: Vector3i?)
+    data class ProxyUpdateData(val pos: Vector3i, val idealPos: Vector3d, val controller: IVRData, val anchorPos: Vector3i?)
 
     /**
      * Enum specifying VR controller type.
@@ -64,7 +65,7 @@ class MarionettaShips: ShipForcesInducer {
 
         val vel = physShip.poseVel.vel
 
-        proxyUpdates.pollUntilEmpty { (pos, idealPos, vrPlayer, anchorPos) ->
+        proxyUpdates.pollUntilEmpty { (pos, idealPos, controller, anchorPos) ->
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
                 pos.toDouble().add(0.5, 0.5, 0.5), Vector3d())
             val idealPosDiff = idealPos.sub(localGrabPos, Vector3d())
@@ -76,16 +77,17 @@ class MarionettaShips: ShipForcesInducer {
             posDif.sub(vel.mul(dConst, Vector3d()))
 
             val force = posDif.mul(mass, Vector3d())
-            println("Applied FOrce: $force")
+            println("Applied Force: $force")
             physShip.applyInvariantForce(force)
 
             val quat = Quaterniond().rotateYXZ(
-                toRadians(-vrPlayer.controller0.yaw.toDouble()),
-                toRadians(-vrPlayer.controller0.pitch.toDouble()),
-                toRadians(vrPlayer.controller0.roll.toDouble())
+                toRadians(-controller.yaw.toDouble()),
+                toRadians(-controller.pitch.toDouble()),
+                toRadians(controller.roll.toDouble())
             ) ?: return@pollUntilEmpty
 
             val rotDiff = quat.mul(physShip.transform.shipToWorldRotation.invert(Quaterniond()), Quaterniond())
+                .normalize().invert()
             val rotDiffVector = Vector3d(rotDiff.x() * 2.0, rotDiff.y() * 2.0, rotDiff.z() * 2.0).mul(pConstR)
 
             if (rotDiff.w < 0) rotDiffVector.mul(-1.0)
@@ -106,16 +108,16 @@ class MarionettaShips: ShipForcesInducer {
      * Add proxy to be processed.
      * @param pos               the position of the proxy ([BlockPos]).
      * @param idealPos          the ideal position of the Ship ([Vector3d]).
-     * @param vrPlayer          the instance of an IVRPlayer bound to the proxy ([IVRPlayer]).
-     * @param anchorPos       The the position of the proxy's linked anchor or null ([Vector3i])
+     * @param controller        the instance of a bound VRPlayer's bound controller ([IVRData]).
+     * @param anchorPos         the position of the proxy's linked anchor or null ([Vector3i])
      */
     fun addProxy(
         pos: BlockPos,
         idealPos: Vector3d,
-        vrPlayer: IVRPlayer,
+        controller: IVRData,
         anchorPos: BlockPos?
     ) {
-        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), idealPos, vrPlayer, anchorPos?.toJOML()))
+        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), idealPos, controller, anchorPos?.toJOML()))
     }
 
     companion object {
