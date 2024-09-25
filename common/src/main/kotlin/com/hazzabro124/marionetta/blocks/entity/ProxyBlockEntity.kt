@@ -90,13 +90,22 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
             // If player not in VR or VRAPI is null, return
             val vrPlayer = VRPlugin.vrAPI?.getVRPlayer(player) ?: return
 
+            var anchorDirection: Vector3d? = null
             val anchorPos = proxy.getAndValidateAnchor(level)?.let { anchor ->
-                level.getShipObjectManagingPos(anchor)?.shipToWorld?.transformPosition(anchor.toJOMLD())?.toBlock() ?: anchor
+                val anchorShip = level.getShipObjectManagingPos(anchor)
+                if (anchorShip == null) {
+                    anchorDirection = level.getBlockState(anchor).getValue(BlockStateProperties.FACING).normal.toJOMLD()
+                    anchor
+                } else {
+                    anchorDirection = anchorShip.transform.shipToWorldRotation.transform(
+                        level.getBlockState(anchor).getValue(BlockStateProperties.FACING).normal.toJOMLD(), Vector3d())
+                    anchorShip.transform.shipToWorld.transformPosition(anchor.toJOMLD()).toBlock()
+                }
             }
 
             val controllerType = state.getValue(MarionettaProperties.CONTROLLER)
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos)
+            forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos, anchorDirection)
         }
     }
 }

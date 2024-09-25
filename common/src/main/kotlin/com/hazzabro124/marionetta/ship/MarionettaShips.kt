@@ -35,7 +35,7 @@ class MarionettaShips: ShipForcesInducer {
      * @property controllerType The selected controller ([ControllerTypeEnum]).
      * @property anchorPos      The position of the proxy's linked anchor or null ([Vector3i])
      */
-    data class ProxyUpdateData(val pos: Vector3i, val vrPlayer: IVRPlayer, val controllerType: ControllerTypeEnum, val anchorPos: Vector3i?)
+    data class ProxyUpdateData(val pos: Vector3i, val vrPlayer: IVRPlayer, val controllerType: ControllerTypeEnum, val anchorPos: Vector3i?, val anchorDirection: Vector3d?)
 
     /**
      * Enum specifying VR controller type.
@@ -68,16 +68,23 @@ class MarionettaShips: ShipForcesInducer {
 
         val vel = physShip.poseVel.vel
 
-        proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos) ->
+        proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos, anchorDirection) ->
             val controller = when(controllerType) {
                 ControllerTypeEnum.controller0 -> vrPlayer.controller0
                 else -> vrPlayer.controller1
             }
 
-            val headQuat = Quaterniond().rotateYXZ(
+            val headQuat = Quaterniond()
+            anchorDirection?.let { direction ->
+                headQuat.rotateYXZ(
+                    toRadians(-direction.y),
+                    toRadians(direction.x),
+                    toRadians(direction.z)
+                )
+            } ?: headQuat.rotateYXZ(
                 toRadians(-vrPlayer.hmd.yaw.toDouble()),
                 toRadians(vrPlayer.hmd.pitch.toDouble()),
-                toRadians(0.0),
+                toRadians(0.0)
             )
 
             val localXOffset = if (controllerType == ControllerTypeEnum.controller1) xOffset * -1 else xOffset
@@ -140,9 +147,10 @@ class MarionettaShips: ShipForcesInducer {
         pos: BlockPos,
         vrPlayer: IVRPlayer,
         controllerType: ControllerTypeEnum,
-        anchorPos: BlockPos?
+        anchorPos: BlockPos?,
+        anchorDirection: Vector3d?
     ) {
-        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), vrPlayer, controllerType, anchorPos?.toJOML()))
+        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), vrPlayer, controllerType, anchorPos?.toJOML(), anchorDirection))
     }
 
     companion object {
