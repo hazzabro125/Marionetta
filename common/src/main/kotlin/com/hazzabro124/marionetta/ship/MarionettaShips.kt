@@ -13,7 +13,9 @@ import org.joml.Vector3i
 import org.valkyrienskies.core.api.ships.*
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.util.pollUntilEmpty
+import org.valkyrienskies.mod.common.util.toBlockPos
 import org.valkyrienskies.mod.common.util.toJOML
+import org.valkyrienskies.mod.common.util.toJOMLD
 import java.lang.Math.toRadians
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -85,7 +87,7 @@ class MarionettaShips: ShipForcesInducer {
                     .sub(vrPlayer.hmd.position().toJOML())
                     .add(headQuat.transform(Vector3d(localXOffset, yOffset, zOffset)))
                     .mul(scale)
-                    .add(vrPlayer.hmd.position().toJOML())
+                    .add(anchorPos?.toBlockPos()?.toJOMLD() ?: vrPlayer.hmd.position().toJOML())
 
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
                 pos.toDouble().add(0.5, 0.5, 0.5), Vector3d())
@@ -144,15 +146,15 @@ class MarionettaShips: ShipForcesInducer {
     }
 
     companion object {
-        val scale = 4.0
-        val xOffset = -0.25
-        val yOffset = 0.25
-        val zOffset = 0.0
+        const val scale = 4.0
+        const val xOffset = -0.25
+        const val yOffset = 0.25
+        const val zOffset = 0.0
 
-        val pConst = 160.0
-        val dConst = 20.0
-        val pConstR = 160.0
-        val dConstR = 20.0
+        const val pConst = 160.0
+        const val dConst = 20.0
+        const val pConstR = 160.0
+        const val dConstR = 20.0
 
         /**
          * Gets or creates a VS ship attachment

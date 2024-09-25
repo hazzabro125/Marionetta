@@ -7,6 +7,7 @@ import com.hazzabro124.marionetta.blocks.custom.ProxyAnchorBlock
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
@@ -25,7 +26,10 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
     var anchorPos: BlockPos? = null
 
     fun bindPlayer(player: Player) {
-        if (VRPlugin.vrAPI?.playerInVR(player) != true) return
+        if (VRPlugin.vrAPI?.playerInVR(player) != true) {
+            player.sendMessage(TextComponent("Cannnot bind to a non-VR player!"), player.uuid)
+            return
+        }
         boundPlayer = player.uuid
         this.setChanged()
     }
@@ -37,7 +41,6 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
 
     fun getAndValidateAnchor(level: ServerLevel): BlockPos? {
         if (anchorPos == null) return null
-        if (level.isLoaded(anchorPos!!)) return null
 
         val state = level.getBlockState(anchorPos!!)
         if (state.block !is ProxyAnchorBlock) {
@@ -45,6 +48,7 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
             this.setChanged()
             return anchorPos
         }
+
         if (state.getValue(BlockStateProperties.POWER) <= 0) return null
 
         return anchorPos!!
