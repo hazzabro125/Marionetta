@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.hazzabro124.marionetta.util.extension.toDouble
 import net.blf02.vrapi.api.data.IVRData
 import net.blf02.vrapi.api.data.IVRPlayer
+import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
 import net.minecraft.util.StringRepresentable
 import org.joml.Quaterniond
@@ -28,11 +29,11 @@ class MarionettaShips: ShipForcesInducer {
     /**
      * Data class for proxy block updates.
      * @property pos            Position of the proxy block on a Ship ([Vector3i])
-     * @property idealPos       The ideal Ship position ([Vector3d])
-     * @property controller     The instance of a bound VRPlayer's bound controller ([IVRData]).
+     * @property vrPlayer       The bound VRPlayer instance ([IVRPlayer])
+     * @property controllerType The selected controller ([ControllerTypeEnum]).
      * @property anchorPos      The position of the proxy's linked anchor or null ([Vector3i])
      */
-    data class ProxyUpdateData(val pos: Vector3i, val idealPos: Vector3d, val controller: IVRData, val anchorPos: Vector3i?)
+    data class ProxyUpdateData(val pos: Vector3i, val vrPlayer: IVRPlayer, val controllerType: ControllerTypeEnum, val anchorPos: Vector3i?)
 
     /**
      * Enum specifying VR controller type.
@@ -65,7 +66,27 @@ class MarionettaShips: ShipForcesInducer {
 
         val vel = physShip.poseVel.vel
 
-        proxyUpdates.pollUntilEmpty { (pos, idealPos, controller, anchorPos) ->
+        proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos) ->
+            val controller = when(controllerType) {
+                ControllerTypeEnum.controller0 -> vrPlayer.controller0
+                else -> vrPlayer.controller1
+            }
+
+            val headQuat = Quaterniond().rotateYXZ(
+                toRadians(-vrPlayer.hmd.yaw.toDouble()),
+                toRadians(vrPlayer.hmd.pitch.toDouble()),
+                toRadians(0.0),
+            )
+
+            val localXOffset = if (controllerType == ControllerTypeEnum.controller1) xOffset * -1 else xOffset
+
+            val idealPos: Vector3d =
+                controller.position().toJOML()
+                    .sub(vrPlayer.hmd.position().toJOML())
+                    .add(headQuat.transform(Vector3d(localXOffset, yOffset, zOffset)))
+                    .mul(scale)
+                    .add(vrPlayer.hmd.position().toJOML())
+
             val localGrabPos = physShip.transform.shipToWorld.transformPosition(
                 pos.toDouble().add(0.5, 0.5, 0.5), Vector3d())
             val idealPosDiff = idealPos.sub(localGrabPos, Vector3d())
@@ -80,13 +101,15 @@ class MarionettaShips: ShipForcesInducer {
             println("Applied Force: $force")
             physShip.applyInvariantForce(force)
 
-            val quat = Quaterniond().rotateYXZ(
+
+
+            val handQuat = Quaterniond().rotateYXZ(
                 toRadians(-controller.yaw.toDouble()),
                 toRadians(-controller.pitch.toDouble()),
                 toRadians(controller.roll.toDouble())
             ) ?: return@pollUntilEmpty
 
-            val rotDiff = quat.mul(physShip.transform.shipToWorldRotation.invert(Quaterniond()), Quaterniond())
+            val rotDiff = handQuat.mul(physShip.transform.shipToWorldRotation.invert(Quaterniond()), Quaterniond())
                 .normalize().invert()
             val rotDiffVector = Vector3d(rotDiff.x() * 2.0, rotDiff.y() * 2.0, rotDiff.z() * 2.0).mul(pConstR)
 
@@ -107,20 +130,25 @@ class MarionettaShips: ShipForcesInducer {
     /**
      * Add proxy to be processed.
      * @param pos               the position of the proxy ([BlockPos]).
-     * @param idealPos          the ideal position of the Ship ([Vector3d]).
-     * @param controller        the instance of a bound VRPlayer's bound controller ([IVRData]).
+     * @param vrPlayer          The bound VRPlayer instance ([IVRPlayer])
+     * @param controllerType    The selected controller ([ControllerTypeEnum]).
      * @param anchorPos         the position of the proxy's linked anchor or null ([Vector3i])
      */
     fun addProxy(
         pos: BlockPos,
-        idealPos: Vector3d,
-        controller: IVRData,
+        vrPlayer: IVRPlayer,
+        controllerType: ControllerTypeEnum,
         anchorPos: BlockPos?
     ) {
-        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), idealPos, controller, anchorPos?.toJOML()))
+        proxyUpdates.add(ProxyUpdateData(pos.toJOML(), vrPlayer, controllerType, anchorPos?.toJOML()))
     }
 
     companion object {
+        val scale = 4.0
+        val xOffset = -0.25
+        val yOffset = 0.25
+        val zOffset = 0.0
+
         val pConst = 160.0
         val dConst = 20.0
         val pConstR = 160.0

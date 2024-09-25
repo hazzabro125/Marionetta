@@ -70,8 +70,7 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
 
     companion object {
         fun tick(level: Level, pos: BlockPos, state: BlockState, proxy: BlockEntity) {
-            if (level.isClientSide || proxy !is ProxyBlockEntity) return
-            val level = level as ServerLevel
+            if (level !is ServerLevel || proxy !is ProxyBlockEntity) return
 
             // If not on a Ship, return, no need in trying to apply forces ot something that doesn't exist
             val ship = level.getShipObjectManagingPos(pos) ?: return
@@ -81,38 +80,13 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
 
             // If no player with UUID exists or UUID is null, return
             val player = proxy.boundPlayer?.let { level.getPlayerByUUID(it) } ?: return
+
             // If player not in VR or VRAPI is null, return
             val vrPlayer = VRPlugin.vrAPI?.getVRPlayer(player) ?: return
 
             val controllerType = state.getValue(MarionettaProperties.CONTROLLER)
-            val controller = when(controllerType) {
-                MarionettaShips.ControllerTypeEnum.controller0 -> vrPlayer.controller0
-                else -> vrPlayer.controller1
-            }
-
-            val quat = Quaterniond().rotateYXZ(
-                toRadians(-vrPlayer.hmd.yaw.toDouble()),
-                toRadians(vrPlayer.hmd.pitch.toDouble()),
-                toRadians(0.0),
-            )
-
-            val scale = 4.0
-            var xOffset = -0.25
-            val yOffset = 0.25
-            val zOffset = 0.0
-
-            if (controllerType == MarionettaShips.ControllerTypeEnum.controller1)
-                xOffset *= -1
-
-            val idealPos: Vector3d =
-                controller.position().toJOML()
-                    .sub(vrPlayer.hmd.position().toJOML())
-                    .add(quat.transform(Vector3d(xOffset, yOffset, zOffset)))
-                    .mul(scale)
-                    .add(vrPlayer.hmd.position().toJOML())
-
             val forcesApplier = MarionettaShips.getOrCreate(ship)
-            forcesApplier.addProxy(pos, idealPos, controller, proxy.getAndValidateAnchor(level))
+            forcesApplier.addProxy(pos, vrPlayer, controllerType, proxy.getAndValidateAnchor(level))
         }
     }
 }

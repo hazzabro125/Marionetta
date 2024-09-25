@@ -8,6 +8,7 @@ import com.hazzabro124.marionetta.util.DirectionalShape
 import com.hazzabro124.marionetta.util.RotShapes
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.network.chat.TextComponent
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -69,18 +70,21 @@ class ProxyBlock: DirectionalBlock(
         hand: InteractionHand,
         hit: BlockHitResult
     ): InteractionResult {
-        if (level.isClientSide) return InteractionResult.sidedSuccess(true)
+        if (level.isClientSide)
+            return InteractionResult.sidedSuccess(true)
         
         val be = level.getBlockEntity(pos)
         if (be !is ProxyBlockEntity) return InteractionResult.FAIL
         
-        if (be.boundPlayer != player.uuid) 
+        if (be.boundPlayer != player.uuid) {
+            player.sendMessage(TextComponent("Bound ${player.name.string} to Proxy!"), player.uuid)
             be.bindPlayer(player)
+        }
 
         val newState = state.cycle(MarionettaProperties.CONTROLLER)
+        player.sendMessage(TextComponent("Set Proxy's Controller to ${newState.getValue(MarionettaProperties.CONTROLLER).value}!"), player.uuid)
         level.setBlock(pos, newState, 3)
         level.updateNeighborsAt(pos, this)
-        //level.setBlockAndUpdate(pos, newState)
         
         return InteractionResult.CONSUME
     }
