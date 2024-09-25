@@ -28,7 +28,7 @@
       }
     ],
     "preLaunch": [
-      "org.valkyrienskies.tournament.fabric.ValkyrienPreLaunch"
+      "com.hazzabro124.marionetta.fabric.ValkyrienPreLaunch"
     ],
     "modmenu": [
       {
