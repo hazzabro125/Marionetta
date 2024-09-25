@@ -119,11 +119,19 @@ class MarionettaShips: ShipForcesInducer {
 
 
 
-            val handQuat = Quaterniond().rotateYXZ(
+            var handQuat = Quaterniond().rotateYXZ(
                 toRadians(-controller.yaw.toDouble()),
                 toRadians(-controller.pitch.toDouble()),
                 toRadians(controller.roll.toDouble())
             ) ?: return@pollUntilEmpty
+
+            if (anchorDirection != null) {
+                handQuat = handQuat.difference(headQuat).add(Quaterniond().rotateYXZ(
+                    toRadians(-anchorDirection.y),
+                    toRadians(anchorDirection.x),
+                    toRadians(anchorDirection.z)
+                ))
+            }
 
             val rotDiff = handQuat.mul(physShip.transform.shipToWorldRotation.invert(Quaterniond()), Quaterniond())
                 .normalize().invert()
