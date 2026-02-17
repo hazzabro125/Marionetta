@@ -5,14 +5,14 @@ import com.hazzabro124.marionetta.blocks.custom.ProxyAnchorBlock
 import com.hazzabro124.marionetta.blocks.custom.ProxyBlock
 import com.hazzabro124.marionetta.blocks.entity.ProxyBlockEntity
 import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.TextComponent
+import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.context.UseOnContext
 
 class LinkStickItem: Item(
-    Properties().tab(MarionettaItems.TAB)
+    Properties()
 ) {
 
     override fun useOn(context: UseOnContext): InteractionResult {
@@ -21,17 +21,17 @@ class LinkStickItem: Item(
         val clickedBlock = context.level.getBlockState(context.clickedPos).block
         if (clickedBlock is ProxyAnchorBlock) {
             savePosition(context.itemInHand, context.clickedPos)
-            context.player?.sendMessage(TextComponent("Read position as ${context.clickedPos}"), context.player!!.uuid)
+            context.player?.sendSystemMessage(Component.literal("Read position as ${context.clickedPos}"))
         } else if (clickedBlock is ProxyBlock){
             val savedPos = loadPosition(context.itemInHand) ?: run {
-                context.player?.sendMessage(TextComponent("No Position Saved!"), context.player!!.uuid)
+                context.player?.sendSystemMessage(Component.literal("No Position Saved!"))
                 return InteractionResult.FAIL
             }
-            context.player?.sendMessage(TextComponent("Loading position as ${savedPos}"), context.player!!.uuid)
+            context.player?.sendSystemMessage(Component.literal("Loading position as ${savedPos}"))
             val be = context.level.getBlockEntity(context.clickedPos)
             if (be is ProxyBlockEntity) {
                 be.linkAnchor(savedPos)
-                context.player?.sendMessage(TextComponent("Link Successful!"), context.player!!.uuid)
+                context.player?.sendSystemMessage(Component.literal("Link Successful!"))
             }else
                 return InteractionResult.FAIL
         }

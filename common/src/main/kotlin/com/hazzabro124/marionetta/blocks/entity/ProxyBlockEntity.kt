@@ -1,27 +1,24 @@
 package com.hazzabro124.marionetta.blocks.entity
 
-import com.hazzabro124.marionetta.blocks.MarionettaBlockEntities
 import com.hazzabro124.marionetta.MarionettaProperties
 import com.hazzabro124.marionetta.VRPlugin
+import com.hazzabro124.marionetta.blocks.MarionettaBlockEntities
 import com.hazzabro124.marionetta.blocks.custom.ProxyAnchorBlock
 import com.hazzabro124.marionetta.ship.MarionettaShips
 import com.hazzabro124.marionetta.util.extension.toBlock
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.network.chat.TextComponent
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
-import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.valkyrienskies.mod.common.getShipObjectManagingPos
-import org.valkyrienskies.mod.common.util.toJOML
 import org.valkyrienskies.mod.common.util.toJOMLD
-import java.lang.Math.toRadians
-import java.util.UUID
+import java.util.*
 
 class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(MarionettaBlockEntities.PROXY.get(), pos, state) {
     var boundPlayer: UUID? = null
@@ -29,7 +26,7 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
 
     fun bindPlayer(player: Player) {
         if (VRPlugin.vrAPI?.playerInVR(player) != true) {
-            player.sendMessage(TextComponent("Cannnot bind to a non-VR player!"), player.uuid)
+            player.sendSystemMessage(Component.literal("Cannnot bind to a non-VR player!"))
             return
         }
         boundPlayer = player.uuid
@@ -109,7 +106,7 @@ class ProxyBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Marionett
                 else -> MarionettaShips.ProxySettings()
             }
 
-            val forcesApplier = MarionettaShips.getOrCreate(ship)
+            val forcesApplier = MarionettaShips.get(ship)
             forcesApplier.addProxy(pos, vrPlayer, controllerType, anchorPos, anchorDirection, settings)
         }
     }

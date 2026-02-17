@@ -1,36 +1,42 @@
 modLoader = "kotlinforforge"
-loaderVersion = "[3.12.0,)"
-issueTrackerURL = "https://github.com/ValkyrienSkies/Valkyrien-Skies-2/issues"
-license = "Apache-2.0"
+loaderVersion = "[4.11,)"
+#issueTrackerURL = ""
+license = "Insert License Here"
 
 [[mods]]
 modId = "marionetta"
 version = "${version}"
-displayName = "Marionetta"
-authors = [
-    "Hazzabro124"
-]
+displayName = "Valkyrien Skies Addon Template"
+authors = "Me!"
 description = '''
-
+This is an example description! Tell everyone what your mod is about!
 '''
+logoFile = "icon.png"
 
 [[dependencies.marionetta]]
 modId = "forge"
 mandatory = true
-versionRange = "[40.2.0,)"
+versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.marionetta]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.18.2,)"
+versionRange = "[1.20.1,)"
 ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.marionetta]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9.1.12,)"
+ordering = "AFTER"
 side = "BOTH"
 
 [[dependencies.marionetta]]
 modId = "valkyrienskies"
 mandatory = true
-versionRange = "[${vs2_version},)"
+versionRange = "[2.4.0,)"
 ordering = "AFTER"
 side = "BOTH"

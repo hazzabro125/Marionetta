@@ -7,27 +7,19 @@ import com.hazzabro124.marionetta.ship.MarionettaShips
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
-import org.valkyrienskies.core.api.ships.saveAttachment
-import org.valkyrienskies.core.impl.config.VSConfigClass
-import org.valkyrienskies.core.impl.hooks.VSEvents
+import org.valkyrienskies.mod.common.ValkyrienSkiesMod.vsCore
 
 object MarionettaMod {
     const val MOD_ID = "marionetta"
 
     @JvmStatic
     fun init() {
-        VSConfigClass.registerConfig(MOD_ID, MarionettaConfig::class.java)
+        //VSConfigApi.registerConfig(MOD_ID, MarionettaConfig::class.java)
+        vsCore.registerAttachment(MarionettaShips::class.java)
+
         MarionettaBlocks.register()
         MarionettaItems.register()
         MarionettaBlockEntities.register()
-
-        VSEvents.shipLoadEvent.on { e ->
-            val ship = e.ship
-
-            if (MarionettaConfig.SERVER.removeAllAttachments){
-                ship.saveAttachment<MarionettaShips>(null)
-            }
-        }
     }
 
     @JvmStatic

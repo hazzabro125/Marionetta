@@ -2,22 +2,22 @@ package com.hazzabro124.marionetta.ship
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.hazzabro124.marionetta.util.extension.toDouble
-import net.blf02.vrapi.api.data.IVRData
 import net.blf02.vrapi.api.data.IVRPlayer
-import net.blf02.vrapi.data.VRPlayer
 import net.minecraft.core.BlockPos
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.StringRepresentable
 import org.joml.Quaterniond
 import org.joml.Vector3d
 import org.joml.Vector3i
 import org.valkyrienskies.core.api.ships.*
+import org.valkyrienskies.core.api.world.PhysLevel
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl
 import org.valkyrienskies.core.util.pollUntilEmpty
-import org.valkyrienskies.mod.common.util.toBlockPos
+import org.valkyrienskies.mod.common.getLoadedShipManagingPos
 import org.valkyrienskies.mod.common.util.toJOML
-import org.valkyrienskies.mod.common.util.toJOMLD
 import java.lang.Math.toRadians
 import java.util.concurrent.ConcurrentLinkedQueue
+
 
 @JsonAutoDetect(
     fieldVisibility = JsonAutoDetect.Visibility.ANY,
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
     setterVisibility = JsonAutoDetect.Visibility.NONE
 )
-class MarionettaShips: ShipForcesInducer {
+class MarionettaShips: ShipPhysicsListener {
     var xkp: Double = 0.0
 
     /**
@@ -72,10 +72,13 @@ class MarionettaShips: ShipForcesInducer {
 
     val proxyUpdates = ConcurrentLinkedQueue<ProxyUpdateData>()
 
-    override fun applyForces(physShip: PhysShip) {
+    override fun physTick(
+        physShip: PhysShip,
+        physLevel: PhysLevel
+    ) {
         physShip as PhysShipImpl
 
-        val vel = physShip.poseVel.vel
+        val vel = physShip.velocity
 
         proxyUpdates.pollUntilEmpty { (pos, vrPlayer, controllerType, anchorPos, anchorDirection, settings) ->
             val controller = when(controllerType) {
@@ -108,7 +111,7 @@ class MarionettaShips: ShipForcesInducer {
             val idealPosDiff = idealPos.sub(localGrabPos, Vector3d())
 
             val posDif = idealPosDiff.mul(pConst, Vector3d())
-            val mass = physShip.inertia.shipMass
+            val mass = physShip.mass
 
             // Integrate
             posDif.sub(vel.mul(dConst, Vector3d()))
@@ -133,16 +136,15 @@ class MarionettaShips: ShipForcesInducer {
             rotDiffVector.mul(-1.0)
 
             // Integrate
-            rotDiffVector.sub(physShip.poseVel.omega.mul(dConstR, Vector3d()))
+            rotDiffVector.sub(physShip.angularVelocity.mul(dConstR, Vector3d()))
             val torque = physShip.transform.shipToWorldRotation.transform(
-                physShip.inertia.momentOfInertiaTensor.transform(
+                physShip.momentOfInertia.transform(
                     physShip.transform.shipToWorldRotation.transformInverse(
                         rotDiffVector, Vector3d())))
             println("Applied Torque: $torque")
             physShip.applyInvariantTorque(torque)
         }
     }
-
     /**
      * Add proxy to be processed.
      * @param pos               the position of the proxy ([BlockPos]).
@@ -172,10 +174,20 @@ class MarionettaShips: ShipForcesInducer {
          * Gets or creates a VS ship attachment
          * @param ship the ship to apply to ([ServerShip]).
          */
-        fun getOrCreate(ship: ServerShip) =
-            ship.getAttachment<MarionettaShips>()
-                ?: MarionettaShips().also {
-                    ship.saveAttachment(it)
-                }
+        fun get(ship: LoadedServerShip): MarionettaShips {
+            var attachment: MarionettaShips? =
+                ship.getAttachment(MarionettaShips::class.java)
+            if (attachment == null) {
+                attachment = MarionettaShips()
+                ship.setAttachment(attachment)
+            }
+            return attachment
+        }
+
+        fun get(level: ServerLevel, pos: BlockPos): MarionettaShips? {
+            val ship: LoadedServerShip? = level.getLoadedShipManagingPos(pos)
+            return if (ship != null) get(ship) else null
+        }
+
     }
 }

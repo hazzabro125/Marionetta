@@ -5,22 +5,15 @@ import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.block.Block
-import net.minecraft.world.level.block.DirectionalBlock
-import net.minecraft.world.level.block.RenderShape
-import net.minecraft.world.level.block.SoundType
+import net.minecraft.world.level.block.*
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
-import net.minecraft.world.level.material.Material
-import org.valkyrienskies.mod.common.util.toJOML
-import com.hazzabro124.marionetta.ship.MarionettaShips
-import java.util.concurrent.CopyOnWriteArrayList
 
 
 class ProxyAnchorBlock(
 ) : DirectionalBlock(
-    Properties.of(Material.STONE)
+    Properties.copy(Blocks.STONE)
         .sound(SoundType.STONE)
         .strength(1.0f, 2.0f)
 ) {

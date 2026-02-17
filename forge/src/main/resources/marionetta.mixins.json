@@ -2,10 +2,10 @@
   "required": true,
   "package": "com.hazzabro124.marionetta.forge.mixin",
   "compatibilityLevel": "JAVA_17",
-  "plugin": "com.hazzabro124.marionetta.forge.mixin.ValkyrienForgeMixinConfigPlugin",
   "mixins": [
   ],
-  "client": [],
+  "client": [
+  ],
   "injectors": {
     "defaultRequire": 1
   },

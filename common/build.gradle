@@ -1,29 +1,43 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    common rootProject.enabled_platforms.split(',')
 }
 
-loom {
-    accessWidenerPath = file("src/main/resources/marionetta.accesswidener")
+repositories {
+    maven {
+        url = 'https://jitpack.io'
+    }
 }
 
 dependencies {
-    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+    modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
 
-    modImplementation "dev.architectury:architectury:${rootProject.architectury_version}"
+    // Architectury API. This is optional, and you can comment it out if you don't need it.
+    modImplementation "dev.architectury:architectury:$architectury_api_version"
 
-    modApi("org.valkyrienskies:valkyrienskies-118-common:${rootProject.vs2_version}")
+    implementation("io.github.llamalad7:mixinextras-common:0.4.1")
 
-    compileOnly("org.valkyrienskies.core:api:${rootProject.vs_core_version}")
-    compileOnly("org.valkyrienskies.core:api-game:${rootProject.vs_core_version}")
-    compileOnly("org.valkyrienskies.core:util:${rootProject.vs_core_version}")
-    compileOnly("org.valkyrienskies.core:impl:${rootProject.vs_core_version}")
-
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10"
-    api "org.jetbrains.kotlin:kotlin-reflect:1.9.10"
+    modApi("org.valkyrienskies:valkyrienskies-120-common:$vs2_version") {
+        exclude group: "com.simibubi"
+        exclude group: "io.github.fabricators_of_create"
+        exclude group: "dev.engine-room"
+        exclude group: "dev.engine_room"
+    }
+    implementation("org.valkyrienskies.core:api:$vs_core_version") {
+        exclude group: 'org.joml', module: ''
+    }
+    implementation("org.valkyrienskies.core:impl:$vs_core_version") {
+        exclude group: 'org.joml', module: ''
+    }
+    implementation("org.valkyrienskies.core:internal:$vs_core_version") {
+        exclude group: 'org.joml', module: ''
+    }
 
     modCompileOnly("curse.maven:cc-restitched-462672:3838648")
-    modCompileOnly("curse.maven:mc-vr-api-591092:5032461")
+    modCompileOnly("curse.maven:mc-vr-api-591092:6061309")
 
+    implementation("org.joml:joml-primitives:1.10.0")
+    implementation("org.joml:joml:1.10.4")
 }

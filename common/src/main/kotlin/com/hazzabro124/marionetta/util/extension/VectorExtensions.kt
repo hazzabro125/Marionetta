@@ -18,7 +18,7 @@ fun Vector2d.to3d(): Vector3d =
     Vector3d(x, 0.0, y)
 
 fun Vector3d.toBlock(): BlockPos =
-    BlockPos(x, y, z)
+    BlockPos.containing(x, y, z)
 
 fun BlockPos.toChunkPos(): ChunkPos =
     ChunkPos(x shr 4, z shr 4)

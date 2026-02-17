@@ -2,39 +2,21 @@
   "schemaVersion": 1,
   "id": "marionetta",
   "version": "${version}",
-  "name": "Marionetta",
-  "description": "",
+  "name": "Valkyrien Skies Addon Template",
+  "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
-    "Hazzabro124"
+    "Me!"
   ],
   "contact": {
-    "homepage": "https://valkyrienskies.org/",
-    "sources": "https://github.com/ValkyrienSkies/Tournament"
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
-  "license": "Apache-2.0",
-  "icon": "icon.png",
+  "license": "CC0-1.0",
+  "icon": "assets/marionetta/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      {
-        "adapter": "kotlin",
-        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric"
-      }
-    ],
-    "client": [
-      {
-        "adapter": "kotlin",
-        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric${'$'}Client"
-      }
-    ],
-    "preLaunch": [
-      "com.hazzabro124.marionetta.fabric.ValkyrienPreLaunch"
-    ],
-    "modmenu": [
-      {
-        "adapter": "kotlin",
-        "value": "com.hazzabro124.marionetta.fabric.MarionettaModFabric${'$'}ModMenu"
-      }
+      "com.hazzabro124.marionetta.fabric.MarionettaModFabric"
     ]
   },
   "mixins": [
@@ -42,8 +24,14 @@
     "marionetta.mixins.json"
   ],
   "depends": {
-    "minecraft": "=1.18.2",
-    "valkyrienskies": ">=${vs2_version}",
-    "fabricloader": ">=0.14.21"
+    "fabricloader": ">=0.14.24",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "architectury": ">=9.1.12",
+    "fabric-api": "*",
+    "valkyrienskies": ">=2.4.0"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
 }

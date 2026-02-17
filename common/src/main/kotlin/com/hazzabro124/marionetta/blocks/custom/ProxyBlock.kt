@@ -8,7 +8,7 @@ import com.hazzabro124.marionetta.util.DirectionalShape
 import com.hazzabro124.marionetta.util.RotShapes
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.network.chat.TextComponent
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -17,6 +17,7 @@ import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.DirectionalBlock
 import net.minecraft.world.level.block.EntityBlock
 import net.minecraft.world.level.block.RenderShape
@@ -27,13 +28,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
-import net.minecraft.world.level.material.Material
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.VoxelShape
 
 class ProxyBlock: DirectionalBlock(
-    Properties.of(Material.STONE)
+    Properties.copy(Blocks.STONE)
         .sound(SoundType.STONE)
         .strength(1.0f,2.0f)
 ), EntityBlock {
@@ -79,12 +79,12 @@ class ProxyBlock: DirectionalBlock(
         if (be !is ProxyBlockEntity) return InteractionResult.FAIL
         
         if (be.boundPlayer != player.uuid) {
-            player.sendMessage(TextComponent("Bound ${player.name.string} to Proxy!"), player.uuid)
+            player.sendSystemMessage(Component.literal("Bound ${player.name.string} to Proxy!"))
             be.bindPlayer(player)
         }
 
         val newState = state.cycle(MarionettaProperties.CONTROLLER)
-        player.sendMessage(TextComponent("Set Proxy's Controller to ${newState.getValue(MarionettaProperties.CONTROLLER).value}!"), player.uuid)
+        player.sendSystemMessage(Component.literal("Set Proxy's Controller to ${newState.getValue(MarionettaProperties.CONTROLLER).value}!"))
         level.setBlock(pos, newState, 3)
         level.updateNeighborsAt(pos, this)
         
